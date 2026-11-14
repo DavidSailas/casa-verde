@@ -920,3 +920,7 @@ html { scroll-padding-top: calc(var(--cv-header-h) + 12px); }
     .logo-text small { display: none; }
     .logo-text span { letter-spacing: .1em; }
 }
+
+/* Reserve the scrollbar space on every page so the header and content never jump between short and long pages. */
+html { scrollbar-gutter: stable; }
+@supports not (scrollbar-gutter: stable) { html { overflow-y: scroll; } }
