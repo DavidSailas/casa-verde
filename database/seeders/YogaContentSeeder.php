@@ -24,6 +24,28 @@ class YogaContentSeeder extends Seeder
             'button_url' => $yoga['hero']['button_url'],
         ]);
 
+        $this->seed('yoga_hero_link', 1, [
+            'button_text' => $yoga['hero_link']['text'],
+            'button_url' => $yoga['hero_link']['url'],
+        ]);
+
+        foreach ($yoga['chips'] as $index => $chip) {
+            $this->seed('yoga_hero_chips', $index + 1, [
+                'title' => $chip['text'],
+                'subtitle' => $chip['style'],
+            ]);
+        }
+
+        foreach ($yoga['facts'] as $index => $fact) {
+            $this->seed('yoga_hero_facts', $index + 1, ['title' => $fact]);
+        }
+
+        $this->seed('yoga_notice', 1, [
+            'subtitle' => $yoga['notice']['label'],
+            'title' => $yoga['notice']['title'],
+            'description' => $yoga['notice']['text'],
+        ]);
+
         foreach ($yoga['stats'] as $index => $stat) {
             $this->seed('yoga_stats', $index + 1, [
                 'title' => $stat['title'],
@@ -63,6 +85,105 @@ class YogaContentSeeder extends Seeder
             ]);
         }
 
+        $this->seed('yoga_flow', 1, [
+            'title' => $yoga['flow']['title'],
+            'subtitle' => $yoga['flow']['note'],
+            'description' => $yoga['flow']['text'],
+        ]);
+
+        $this->seed('yoga_care', 1, [
+            'title' => $yoga['care']['title'],
+            'description' => $yoga['care']['note'],
+            'features' => $yoga['care']['items'],
+        ]);
+
+        $this->seed('yoga_classes_info', 1, [
+            'title' => $yoga['personal']['title'],
+            'description' => $yoga['personal']['text'],
+            'subtitle' => $yoga['classes']['note'],
+            'features' => [$yoga['classes']['small']],
+        ]);
+
+        foreach ($yoga['classes']['sessions'] as $index => $session) {
+            $this->seed('yoga_classes', $index + 1, [
+                'title' => $session['group'],
+                'subtitle' => $session['name'],
+                'description' => $session['meta'],
+                'button_text' => $session['button_text'],
+                'button_url' => $session['button_url'],
+            ]);
+        }
+
+        $this->seed('yoga_resort', 1, [
+            'title' => $yoga['resort']['title'],
+            'description' => $yoga['resort']['text'],
+        ]);
+
+        foreach ($yoga['resort']['photos'] as $index => $photo) {
+            $this->seed('yoga_resort_photos', $index + 1, [
+                'title' => $photo['caption'],
+                'image' => $photo['image'],
+            ]);
+        }
+
+        $this->seed('yoga_spotlight', 1, [
+            'subtitle' => $yoga['resort']['spotlight']['badge'],
+            'title' => $yoga['resort']['spotlight']['title'],
+            'description' => $yoga['resort']['spotlight']['text'],
+            'image' => $yoga['resort']['spotlight']['image'],
+        ]);
+
+        $this->seed('yoga_gallery_header', 1, [
+            'title' => $yoga['gallery']['title'],
+            'description' => $yoga['gallery']['text'],
+        ]);
+
+        foreach ($yoga['gallery']['items'] as $index => $photo) {
+            $this->seed('yoga_gallery', $index + 1, [
+                'title' => $photo['caption'],
+                'image' => $photo['image'],
+            ]);
+        }
+
+        $this->seed('yoga_teacher', 1, [
+            'title' => $yoga['teacher']['title'],
+            'subtitle' => $yoga['teacher']['role'],
+            'description' => $yoga['teacher']['text'],
+            'image' => $yoga['teacher']['image'],
+            'button_text' => $yoga['teacher']['caption'],
+            'features' => $yoga['teacher']['styles'],
+        ]);
+
+        $this->seed('yoga_package_header', 1, ['title' => $yoga['package']['title']]);
+
+        foreach ($yoga['package']['columns'] as $index => $column) {
+            $this->seed('yoga_package', $index + 1, [
+                'title' => $column['title'],
+                'subtitle' => $column['style'],
+                'features' => $column['items'],
+            ]);
+        }
+
+        $this->seed('yoga_price', 1, [
+            'title' => $yoga['package']['price']['title'],
+            'subtitle' => $yoga['package']['price']['big'],
+            'description' => $yoga['package']['price']['text'],
+            'features' => $yoga['package']['price']['bullets'],
+            'button_text' => $yoga['package']['price']['button_text'],
+            'button_url' => $yoga['package']['price']['button_url'],
+        ]);
+
+        $position = 0;
+
+        foreach ($yoga['layout'] as $key => $block) {
+            // The guest quote is not part of the new layout; it stays one switch away.
+            $this->seed('yoga_layout', ++$position, [
+                'title' => $block['title'],
+                'subtitle' => $key,
+                'active' => $key !== 'quote',
+            ]);
+        }
+
         $this->seed('yoga_features_header', 1, ['title' => $yoga['features']['title']]);
 
         foreach ($yoga['features']['items'] as $index => $feature) {
@@ -72,15 +193,6 @@ class YogaContentSeeder extends Seeder
                 'icon' => $feature['icon'],
             ]);
         }
-
-        $this->seed('yoga_personal', 1, [
-            'subtitle' => $yoga['personal']['eyebrow'],
-            'title' => $yoga['personal']['title'],
-            'description' => $yoga['personal']['text'],
-            'image' => $yoga['personal']['image'],
-            'button_text' => $yoga['personal']['button_text'],
-            'button_url' => $yoga['personal']['button_url'],
-        ]);
 
         $this->seed('yoga_quote', 1, [
             'title' => $yoga['quote']['title'],
@@ -93,17 +205,12 @@ class YogaContentSeeder extends Seeder
             'title' => $yoga['faq']['title'],
         ]);
 
-        foreach ($yoga['faq']['items'] as $index => $item) {
+        foreach ($yoga['faq']['items'] as $index => $entry) {
             $this->seed('yoga_faq', $index + 1, [
-                'title' => $item['title'],
-                'description' => $item['text'],
+                'title' => $entry['title'],
+                'description' => $entry['text'],
             ]);
         }
-
-        $this->seed('yoga_teachers_header', 1, [
-            'subtitle' => $yoga['teachers']['eyebrow'],
-            'title' => $yoga['teachers']['title'],
-        ]);
 
         foreach ($yoga['cta']['buttons'] as $index => $button) {
             $this->seed('yoga_cta', $index + 1, [

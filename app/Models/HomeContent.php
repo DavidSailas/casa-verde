@@ -257,6 +257,12 @@ class HomeContent extends Model
                 app(\Database\Seeders\LongStayContentSeeder::class)->run();
             }
 
+            // The redesigned Yoga Reset page adds a page layout, pills, notice, programme, classes, resort,
+            // gallery, teacher, package and question entries; load them once so they can be edited.
+            if (! static::where('section', 'yoga_layout')->exists()) {
+                app(\Database\Seeders\YogaContentSeeder::class)->run();
+            }
+
             // Villa photo galleries: give every villa its starting photos once.
             static::fillVillaGalleries();
 

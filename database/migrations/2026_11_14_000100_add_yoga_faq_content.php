@@ -1,21 +1,20 @@
 <?php
 
-use Database\Seeders\YogaContentSeeder;
 use Illuminate\Database\Migrations\Migration;
 
 /**
- * The redesigned Yoga Reset page ends with a questions and answers section.
- * This loads its starting content into the admin. Anything already edited is left alone.
+ * Superseded by 2026_11_15_000100_load_yoga_retreat_layout_content. It already ran once and loaded the
+ * first version of the Yoga questions, so it is kept (empty) only so the migration history stays intact.
  */
 return new class extends Migration
 {
     public function up(): void
     {
-        app(YogaContentSeeder::class)->run();
+        // Nothing to do.
     }
 
     public function down(): void
     {
-        // Intentionally empty: removing content is not something to undo silently.
+        // Nothing to do.
     }
 };
