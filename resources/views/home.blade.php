@@ -1018,7 +1018,7 @@ $contactFooter = $contents
                 @if($longStay->button_text)
 
                     <a
-                        href="{{ $longStay->button_url ?? '#' }}"
+                        href="{{ in_array($longStay->button_url ?? '#', ['#', '#longstay', '']) ? route('longstay.index') : $longStay->button_url }}"
                         class="long-stay-button"
                     >
                         {{ $longStay->button_text }}

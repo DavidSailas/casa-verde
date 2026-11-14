@@ -97,6 +97,10 @@ class ContentController extends Controller
             $data['gallery'] = $gallery;
         }
 
+        if (($details = $this->details($request)) !== null) {
+            $data['details'] = $details;
+        }
+
         $item = HomeContent::create($data);
 
         return redirect()
@@ -137,6 +141,10 @@ class ContentController extends Controller
 
         if (($gallery = $this->gallery($request)) !== null) {
             $data['gallery'] = $gallery;
+        }
+
+        if (($details = $this->details($request)) !== null) {
+            $data['details'] = $details;
         }
 
         $content->update($data);
@@ -183,6 +191,27 @@ class ContentController extends Controller
             'gallery.*' => ['string', 'max:255'],
             'gallery_new' => ['nullable', 'array', 'max:20'],
             'gallery_new.*' => ['file', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'],
+            'details' => ['nullable', 'array'],
+            'details.intro' => ['nullable', 'string', 'max:2000'],
+            'details.story_title' => ['nullable', 'string', 'max:300'],
+            'details.story_text' => ['nullable', 'string', 'max:4000'],
+            'details.highlights' => ['nullable', 'array', 'max:8'],
+            'details.highlights.*.icon' => ['nullable', 'string', 'max:255'],
+            'details.highlights.*.icon2' => ['nullable', 'string', 'max:255'],
+            'details.highlights.*.label' => ['nullable', 'string', 'max:120'],
+            'details.amenities' => ['nullable', 'array', 'max:3'],
+            'details.amenities.*' => ['nullable', 'string', 'max:2000'],
+            'details.capacity.guests' => ['nullable', 'integer', 'min:0', 'max:99'],
+            'details.capacity.bathrooms' => ['nullable', 'integer', 'min:0', 'max:99'],
+            'details.bedrooms' => ['nullable', 'array', 'max:8'],
+            'details.bedrooms.*.name' => ['nullable', 'string', 'max:80'],
+            'details.bedrooms.*.beds' => ['nullable', 'string', 'max:120'],
+            'details.layout.interior' => ['nullable', 'numeric', 'min:0', 'max:10000'],
+            'details.layout.terrace' => ['nullable', 'numeric', 'min:0', 'max:10000'],
+            'details.hero' => ['nullable', 'string', 'max:255'],
+            'details.plan' => ['nullable', 'string', 'max:255'],
+            'detail_hero' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'detail_plan' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
         // Titles and text can contain deliberate line breaks (the site renders
@@ -218,7 +247,7 @@ class ContentController extends Controller
             unset($data['sort_order']);
         }
 
-        unset($data['image'], $data['icon_image'], $data['perk_icon_image'], $data['gallery'], $data['gallery_new']);
+        unset($data['image'], $data['icon_image'], $data['perk_icon_image'], $data['gallery'], $data['gallery_new'], $data['details'], $data['detail_hero'], $data['detail_plan']);
 
         return $data;
     }
@@ -264,6 +293,78 @@ class ContentController extends Controller
         }
 
         return array_slice(array_merge($kept, $added), 0, 30);
+    }
+
+    /**
+     * The detail-page content of a villa (see App\Support\VillaDetails), from the "Villa detail page"
+     * box of the form. Null when the form had no such box, so saving any other entry can never touch it.
+     *
+     * @return array<string, mixed>|null
+     */
+    protected function details(Request $request): ?array
+    {
+        if (! $request->boolean('details_present')
+            || ! \Illuminate\Support\Facades\Schema::hasColumn('home_contents', 'details')) {
+            return null;
+        }
+
+        $in = (array) $request->input('details', []);
+        $clean = fn ($value): string => trim(str_replace(["\r\n", "\r"], "\n", (string) $value));
+
+        // A picture already on the site is kept unless "remove" is ticked or a new file is uploaded.
+        $picture = function (string $key, string $upload, string $remove) use ($request, $in): ?string {
+            if ($request->hasFile($upload)) {
+                return $this->storeFile($request->file($upload), $upload);
+            }
+
+            $path = $in[$key] ?? null;
+
+            return ! $request->boolean($remove)
+                && is_string($path)
+                && ! str_contains($path, '..')
+                && preg_match('#^images/[A-Za-z0-9._/-]+\.(jpe?g|png|webp|gif)$#i', $path)
+                && file_exists(public_path($path)) ? $path : null;
+        };
+
+        $highlights = collect((array) ($in['highlights'] ?? []))
+            ->filter(fn ($row) => is_array($row) && filled(trim((string) ($row['label'] ?? ''))))
+            ->map(fn (array $row) => [
+                'icon' => trim((string) ($row['icon'] ?? '')),
+                'icon2' => trim((string) ($row['icon2'] ?? '')),
+                'label' => trim((string) $row['label']),
+            ])
+            ->take(8)
+            ->values()
+            ->all();
+
+        $bedrooms = collect((array) ($in['bedrooms'] ?? []))
+            ->filter(fn ($row) => is_array($row) && (filled(trim((string) ($row['name'] ?? ''))) || filled(trim((string) ($row['beds'] ?? '')))))
+            ->map(fn (array $row) => [
+                'name' => trim((string) ($row['name'] ?? '')),
+                'beds' => trim((string) ($row['beds'] ?? '')),
+            ])
+            ->take(8)
+            ->values()
+            ->all();
+
+        return [
+            'intro' => $clean($in['intro'] ?? ''),
+            'story_title' => $clean($in['story_title'] ?? ''),
+            'story_text' => $clean($in['story_text'] ?? ''),
+            'highlights' => $highlights,
+            'capacity' => [
+                'guests' => $in['capacity']['guests'] ?? '',
+                'bathrooms' => $in['capacity']['bathrooms'] ?? '',
+            ],
+            'bedrooms' => $bedrooms,
+            'amenities' => collect(range(0, 2))->map(fn (int $i) => $clean($in['amenities'][$i] ?? ''))->all(),
+            'layout' => [
+                'interior' => $in['layout']['interior'] ?? '',
+                'terrace' => $in['layout']['terrace'] ?? '',
+            ],
+            'hero' => $picture('hero', 'detail_hero', 'remove_detail_hero'),
+            'plan' => $picture('plan', 'detail_plan', 'remove_detail_plan'),
+        ];
     }
 
     protected function storeFile(\Illuminate\Http\UploadedFile $file, string $field): string

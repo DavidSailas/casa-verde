@@ -168,6 +168,91 @@
         }
     </style>
 
+    <style>
+        /* Experiences page: refined styling on top of the rules above. Text, icons and layout are unchanged. */
+        .experience-page {
+            --ex-forest: #06211b;
+            --ex-gold: #c9a06a;
+            --ex-line: rgba(201, 160, 106, .55);
+            background: #f7f2ea;
+        }
+
+        /* Hero */
+        .experience-page .experience-hero { padding: 118px 44px 26px; gap: 40px; }
+        .experience-page .hero-label { font-size: .95rem; font-weight: 500; letter-spacing: .32em; color: #b98b55; margin: 0 0 14px; }
+        .experience-page .hero-introduction h1 { font-size: clamp(2.1rem, 3.3vw, 3.1rem); font-weight: 600; letter-spacing: .01em; line-height: 1.1; color: var(--ex-forest); }
+        .experience-page .hero-description { font-family: var(--cv-serif, serif); font-size: 1.2rem; line-height: 1.55; max-width: 430px; margin-top: 20px; color: #31443f; }
+        .experience-page .hero-image {
+            height: 230px;
+            border-radius: 22px;
+            box-shadow: 0 26px 40px -26px rgba(6, 33, 27, .7), 0 0 0 1px rgba(201, 160, 106, .35);
+        }
+        .experience-page .hero-image img { transition: transform 1.6s cubic-bezier(.2, .6, .2, 1); }
+        .experience-page .hero-image:hover img { transform: scale(1.03); }
+
+        /* Section headings */
+        .experience-page .experiences-area { padding: 6px 44px 22px; }
+        .experience-page .section-heading { gap: 28px; margin: 0 0 22px; }
+        .experience-page .section-heading span { background: linear-gradient(90deg, transparent, var(--ex-line) 35%, var(--ex-line)); }
+        .experience-page .section-heading span:last-child { background: linear-gradient(270deg, transparent, var(--ex-line) 35%, var(--ex-line)); }
+        .experience-page .section-heading h2 { font-size: 1.2rem; font-weight: 500; letter-spacing: .26em; color: #b98b55; }
+
+        /* Cards: one rounded card (photo + caption) instead of a photo plus a separate box */
+        .experience-page .signature-card,
+        .experience-page .more-card {
+            border: 1px solid var(--ex-line);
+            border-radius: 18px;
+            overflow: hidden;
+            background: #fffaf2;
+            box-shadow: 0 14px 26px -20px rgba(6, 33, 27, .6);
+            transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease;
+        }
+        .experience-page .signature-card:hover,
+        .experience-page .more-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--ex-gold);
+            box-shadow: 0 22px 30px -20px rgba(6, 33, 27, .65);
+        }
+        .experience-page .signature-grid { gap: 36px; }
+        .experience-page .signature-image { height: 124px; border-radius: 0; }
+        .experience-page .signature-title { height: 52px; border: 0; border-top: 1px solid var(--ex-line); font-size: 1.5rem; font-weight: 500; letter-spacing: .01em; color: var(--ex-forest); background: #fffaf2; }
+
+        .experience-page .more-grid { gap: 18px; }
+        .experience-page .more-image { height: 108px; border-radius: 0; }
+        .experience-page .more-content { border: 0; border-top: 1px solid var(--ex-line); padding: 12px 6px 14px; background: #fffaf2; }
+        .experience-page .more-content h3 { font-size: 1.15rem; color: var(--ex-forest); }
+        .experience-page .more-content p { font-size: 1rem; line-height: 1.3; color: #4a5852; }
+
+        /* Concierge bar */
+        .experience-page .concierge-bar {
+            position: relative;
+            background: linear-gradient(180deg, #082a23, #06211b);
+            border-top: 1px solid rgba(201, 160, 106, .5);
+        }
+        .experience-page .concierge-item { border-right-color: rgba(201, 160, 106, .45); }
+        .experience-page .concierge-item h3 { color: #f4e3c4; }
+        .experience-page .plan-button {
+            background: linear-gradient(135deg, #e6bb86, #d19a5b);
+            box-shadow: 0 14px 22px -14px rgba(0, 0, 0, .8);
+            transition: transform .25s ease, box-shadow .25s ease;
+        }
+        .experience-page .plan-button:hover { transform: translateY(-2px); box-shadow: 0 18px 24px -14px rgba(0, 0, 0, .85); }
+        .experience-page a:focus-visible { outline: 2px solid var(--ex-gold); outline-offset: 3px; }
+
+        @media (max-width: 1100px) {
+            .experience-page .experience-hero { padding-top: 108px; }
+        }
+        @media (max-width: 768px) {
+            .experience-page .experience-hero { padding: 100px 20px 20px; gap: 22px; }
+            .experience-page .hero-image { height: 200px; }
+            .experience-page .signature-image { height: 170px; }
+            .experience-page .more-image { height: 120px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .experience-page *, .experience-page *::before, .experience-page *::after { transition: none !important; }
+        }
+    </style>
+
 </head>
 
 <body>

@@ -642,3 +642,130 @@ html.mb-lock [data-cvw-chat] {
     transform: none;
 }
 .mb .mb-hint:active .mb-hint-label { color: #fff0d7; }
+
+/* =====================================================================
+   Refinements
+   1) Price and dietary icons sit on their own line under the dish name
+   2) Long category names and long descriptions always fit their page
+   3) "Jump to" strip: go straight to Pizza, Pasta, Kids...
+   ===================================================================== */
+
+/* ---- 1) Dish name, then price + icons ---- */
+.mbp-name { margin-bottom: calc(var(--u) * .7); }
+.mbp-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: calc(var(--u) * 1.2) calc(var(--u) * 2);
+    margin: 0 0 calc(var(--u) * 1.4);
+}
+.mbp-meta .mbp-price {
+    margin: 0;
+    font-size: calc(var(--u) * 3.8);
+    font-weight: 700;
+    letter-spacing: .08em;
+    line-height: 1;
+    color: #a8793f;
+    font-variant-numeric: tabular-nums;
+}
+.mbp-diets {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--u) * 1.1);
+}
+.mbp-meta .mbp-price + .mbp-diets { padding-left: calc(var(--u) * 2); border-left: 1px solid rgba(168, 121, 63, .45); }
+.mbp-meta .mbp-diet { margin: 0; width: calc(var(--u) * 4.6); height: calc(var(--u) * 4.6); }
+
+.mbp[data-count="3"] .mbp-meta .mbp-price { font-size: calc(var(--u) * 3.3); }
+.mbp[data-count="3"] .mbp-meta .mbp-diet { width: calc(var(--u) * 4); height: calc(var(--u) * 4); }
+.mbp[data-count="4"] .mbp-meta .mbp-price { font-size: calc(var(--u) * 2.9); }
+.mbp[data-count="4"] .mbp-meta .mbp-diet { width: calc(var(--u) * 3.5); height: calc(var(--u) * 3.5); }
+
+/* ---- 2) Long category names ---- */
+.mbp .mbp-title--lg,
+.mbp-kicker + .mbp-title.mbp-title--lg { font-size: calc(var(--u) * 5.8); }
+.mbp .mbp-title--xl,
+.mbp-kicker + .mbp-title.mbp-title--xl { font-size: calc(var(--u) * 4.7); }
+
+/* The dish area is the flexible part of the page: it never grows past it (the script scales text if needed). */
+.mbp-dishes { overflow: hidden; }
+.mbp-text { min-width: 0; }
+
+/* Instant swap when jumping across several spreads: no shading flash. */
+.mb.mb-instant-reset .mb-face::before { animation: none !important; }
+
+/* ---- Phones: centred, larger ---- */
+.mb-scroll .mbp-meta { justify-content: center; }
+.mb-scroll .mbp-meta .mbp-price { font-size: calc(var(--u) * 4.2); }
+.mb-scroll .mbp .mbp-meta .mbp-diet { width: calc(var(--u) * 5); height: calc(var(--u) * 5); }
+.mb-scroll .mbp .mbp-title--lg { font-size: calc(var(--u) * 6); }
+.mb-scroll .mbp .mbp-title--xl { font-size: calc(var(--u) * 5.2); }
+
+/* ---- 3) Jump to a section ---- */
+.mb-contents {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(10px, 1.6vh, 18px);
+    z-index: 6;
+    display: flex;
+    gap: 8px;
+    max-width: min(1040px, calc(100vw - 32px));
+    padding: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    transform: translate(-50%, 8px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .4s .5s, transform .4s .5s, visibility .4s .5s;
+}
+.mb-contents::-webkit-scrollbar { display: none; }
+.mb.is-open .mb-contents { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
+.mb.is-closing .mb-contents { opacity: 0; visibility: hidden; transition-delay: 0s; }
+
+.mb-jump {
+    flex: none;
+    min-height: 36px;
+    padding: 0 16px;
+    border: 1px solid rgba(215, 164, 104, .55);
+    border-radius: 999px;
+    background: rgba(6, 33, 27, .72);
+    color: #e2b98a;
+    font-family: var(--cv-sans, system-ui, sans-serif);
+    font-size: .82rem;
+    font-weight: 500;
+    letter-spacing: .04em;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background .2s, color .2s, border-color .2s;
+}
+.mb-jump:hover { border-color: #e2b98a; background: rgba(226, 185, 138, .16); }
+.mb-jump.is-active { background: #e2b98a; border-color: #e2b98a; color: #06211b; }
+.mb-jump:focus-visible { outline: 3px solid rgba(226, 185, 138, .6); outline-offset: 2px; }
+
+/* Desktop: the strip sits under the book, so the book gives up a little height. */
+@media (min-width: 821px) {
+    .mb:has(.mb-contents) { --mb-h: min(calc(100dvh - 128px), calc((100vw - 180px) / 2 / var(--mb-r))); }
+}
+
+/* Phones: the strip stays at the top of the reading list, clear of the close button. */
+@media (max-width: 820px) {
+    .mb-contents {
+        top: 0;
+        bottom: auto;
+        left: 0;
+        right: 68px; /* stops before the close button */
+        width: auto;
+        max-width: none;
+        padding: 12px 8px 12px 14px;
+        background: linear-gradient(rgba(2, 14, 10, .97) 72%, rgba(2, 14, 10, 0));
+        transform: none;
+        transition: none;
+    }
+    .mb.is-open .mb-contents { opacity: 0; visibility: hidden; transform: none; }
+    .mb.is-reading .mb-contents { opacity: 1; visibility: visible; }
+    .mb-scroll { padding-top: 70px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mb-contents, .mb-jump { transition: none; }
+}

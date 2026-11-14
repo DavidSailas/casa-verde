@@ -19,6 +19,8 @@ class AdminChoices
         return match ($source) {
             'winter_tabs' => ['label' => 'Choose a tab…', 'options' => WinterResidence::tabChoices()],
             'menu_categories' => ['label' => 'Choose a category…', 'options' => static::menuCategories()],
+            'drink_categories' => ['label' => 'Choose a category…', 'options' => static::drinkCategories()],
+            'drink_layouts' => ['label' => 'Automatic (photo cards when every drink has a photo)', 'options' => DrinksMenu::LAYOUTS],
             'journal_articles' => ['label' => 'Choose an article…', 'options' => static::journalArticles()],
             default => ['label' => 'Choose…', 'options' => []],
         };
@@ -39,6 +41,28 @@ class AdminChoices
 
         if ($rows->isEmpty()) {
             return collect(config('pagecontent.dining_page_food_menu_categories', []))
+                ->mapWithKeys(fn (array $row): array => [(string) $row['title'] => (string) $row['title']])
+                ->all();
+        }
+
+        return $rows->mapWithKeys(fn (HomeContent $row): array => [$row->id => (string) $row->title])->all();
+    }
+
+    /**
+     * Drinks menu categories as "id => name" (or "name => name" before they are saved in the admin).
+     *
+     * @return array<int|string, string>
+     */
+    protected static function drinkCategories(): array
+    {
+        try {
+            $rows = HomeContent::where('section', 'dining_page_drinks_categories')->orderBy('sort_order')->get();
+        } catch (Throwable) {
+            $rows = collect();
+        }
+
+        if ($rows->isEmpty()) {
+            return collect(config('pagecontent.dining_page_drinks_categories', []))
                 ->mapWithKeys(fn (array $row): array => [(string) $row['title'] => (string) $row['title']])
                 ->all();
         }

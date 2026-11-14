@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\HomeContent;
+use App\Support\VillaDetails;
 use App\Support\VillaPhotos;
 use Illuminate\Support\Str;
 
@@ -28,12 +29,18 @@ class VillaController extends Controller
 
         $villaPhotos = $this->photos($contents, $villas);
 
+        // Quick facts (guests, bedrooms, bathrooms) for each card, from what is saved on the villa in the admin.
+        $villaDetails = $villas->mapWithKeys(
+            fn ($villa) => [Str::slug($villa->title) => VillaDetails::for($villa)]
+        )->all();
+
         return view('villa', compact(
             'contents',
             'site',
             'villasHeader',
             'villas',
-            'villaPhotos'
+            'villaPhotos',
+            'villaDetails'
         ));
     }
 
@@ -60,9 +67,9 @@ class VillaController extends Controller
 
         abort_if(! $villa, 404);
 
-        // Rich detail content (highlights, amenities, floor plan...) lives in
-        // config/villas.php; fall back to the DB values if a villa has none.
-        $detail = config("villas.{$slug}", []);
+        // Rich detail content (highlights, amenities, floor plan...): what is saved on the villa
+        // entry in the admin, else the starting content in config/villas.php (see VillaDetails).
+        $detail = VillaDetails::for($villa);
 
         $features = is_string($villa->features)
             ? json_decode($villa->features, true)
@@ -75,8 +82,10 @@ class VillaController extends Controller
             'detail'   => $detail,
             'intro'    => $detail['intro'] ?? $villa->description,
             'tagline'  => $detail['tagline'] ?? $villa->subtitle,
-            'heroImage' => $contents->get('villas_detail_hero_' . str_replace('-', '_', $slug), collect())
-                ->first(fn ($item) => filled($item->image))?->image
+            // A wide photo set on the villa entry wins, then the older per-villa admin entry, then the starting photo.
+            'heroImage' => (in_array('hero', $detail['custom'] ?? [], true) ? $detail['hero'] : null)
+                ?: $contents->get('villas_detail_hero_' . str_replace('-', '_', $slug), collect())
+                    ->first(fn ($item) => filled($item->image))?->image
                 ?: ($detail['hero'] ?? $villa->image),
             'features' => $features ?? [],
         ]);

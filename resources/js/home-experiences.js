@@ -54,10 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     root.querySelector('[data-exp-next]')?.addEventListener('click', () => touched(active + 1));
     dots.forEach((dot, index) => dot.addEventListener('click', () => touched(index)));
 
-    // Clicking a side card brings it to the middle.
-    slides.forEach((slide, index) => slide.addEventListener('click', () => {
-        if (offsetOf(index) !== 0) touched(index);
-    }));
+    // The pictures themselves are display-only: the carousel turns with the arrows, dots, keyboard, swipe or by itself.
 
     root.addEventListener('keydown', (event) => {
         if (event.key === 'ArrowLeft') touched(active - 1);

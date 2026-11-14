@@ -41,6 +41,8 @@
     $vBottom = \App\Models\HomeContent::pageRows($contents, 'villas_page_bottom');
     $vBook = \App\Models\HomeContent::pageRow($contents, 'villas_page_book');
     $featureIconRows = \App\Models\HomeContent::pageRows($contents, 'villas_feature_icons');
+    // Wording of the pop-up's "check availability" button: the same admin-editable label the villa pages use.
+    $vCheckLabel = \App\Models\HomeContent::pageLabels($contents, 'villas_detail_labels')[2] ?? 'Check availability';
     $vHref = fn (?string $url) => \Illuminate\Support\Str::startsWith($url ?? '', ['http', '#', 'mailto:', 'tel:']) ? $url : url($url ?: '/book');
 @endphp
 
@@ -103,9 +105,22 @@
              VILLA CARDS
         ================================================== --}}
 
-        <div class="villa-container">
+        @php
+            // If at least one villa shows quick facts, the others reserve the same row so prices and buttons line up.
+            $anyFacts = $villas->contains(fn ($v) => !empty($villaDetails[\Illuminate\Support\Str::slug($v->title)]['capacity'] ?? []));
+        @endphp
+
+        <div class="villa-container" style="--villa-count: {{ max(1, $villas->count()) }}">
 
             @foreach($villas as $villa)
+
+                @php
+                    $cardSlug = \Illuminate\Support\Str::slug($villa->title);
+                    $cardFacts = $villaDetails[$cardSlug]['capacity'] ?? [];
+                    $cardDetailsUrl = filled($villa->button_url) && $villa->button_url !== '#'
+                        ? $villa->button_url
+                        : route('villas.show', $cardSlug);
+                @endphp
 
                 <article class="villa-card">
 
@@ -134,46 +149,99 @@
 
                             <span class="villa-photo-count" aria-hidden="true">
                                 <svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>
-                                {{ count($photos) }} photos
+                                View {{ count($photos) }} photos
                             </span>
                         </button>
 
-                        <dialog class="vm" id="vm-{{ $loop->index }}" data-vm aria-label="{{ $villa->title }} photos">
-                            <div class="vm-inner">
+                        @php
+                            $vmId = 'vm-' . $loop->index;
+                            $vmSlug = \Illuminate\Support\Str::slug($villa->title);
+                            $vmDetailsUrl = filled($villa->button_url) && $villa->button_url !== '#'
+                                ? $villa->button_url
+                                : route('villas.show', $vmSlug);
+                        @endphp
 
-                                <p class="vm-title">{{ $villa->title }}</p>
+                        <dialog class="vm" id="{{ $vmId }}" data-vm aria-label="{{ $villa->title }} photos">
+                            <div class="vm-shell">
 
-                                <button type="button" class="vm-close" data-vm-close aria-label="Close photos">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
-                                </button>
+                                <header class="vm-top">
+                                    <div class="vm-heading">
+                                        <h2 class="vm-title">{{ $villa->title }}</h2>
+                                        @if($villa->subtitle)
+                                            <p class="vm-tagline">{{ $villa->subtitle }}</p>
+                                        @endif
+                                    </div>
 
-                                <div class="vm-stage" tabindex="0" aria-roledescription="carousel">
-                                    @foreach($photos as $photo)
-                                        <figure
-                                            class="vm-slide"
-                                            data-pos="{{ $loop->first ? '0' : ($loop->iteration === 2 ? '1' : ($loop->last ? '-1' : '2')) }}"
-                                            role="group"
-                                            aria-roledescription="slide"
-                                            aria-label="{{ $loop->iteration }} of {{ count($photos) }}"
-                                        >
-                                            <img
-                                                src="{{ asset($photo) }}"
-                                                alt="{{ $villa->title }}, photo {{ $loop->iteration }}"
-                                                loading="lazy"
+                                    <div class="vm-top-actions">
+                                        <span class="vm-count" aria-live="polite" data-vm-count>1 / {{ count($photos) }}</span>
+                                        <button type="button" class="vm-close" data-vm-close aria-label="Close photos">
+                                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+                                        </button>
+                                    </div>
+                                </header>
+
+                                <div class="vm-stage" tabindex="0" role="group" aria-roledescription="carousel" aria-label="{{ $villa->title }} photos">
+                                    <button type="button" class="vm-arrow vm-arrow--prev" data-vm-prev aria-label="Previous photo">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
+                                    </button>
+
+                                    <div class="vm-frame">
+                                        @foreach($photos as $photo)
+                                            <figure
+                                                class="vm-slide{{ $loop->first ? ' is-active' : '' }}"
+                                                role="group"
+                                                aria-roledescription="slide"
+                                                aria-label="{{ $loop->iteration }} of {{ count($photos) }}"
+                                                aria-hidden="{{ $loop->first ? 'false' : 'true' }}"
+                                                style="--vm-bg: url('{{ asset($photo) }}')"
                                             >
-                                        </figure>
+                                                <img
+                                                    src="{{ asset($photo) }}"
+                                                    alt="{{ $villa->title }}, photo {{ $loop->iteration }}"
+                                                    loading="lazy"
+                                                    draggable="false"
+                                                >
+                                            </figure>
+                                        @endforeach
+                                    </div>
+
+                                    <button type="button" class="vm-arrow vm-arrow--next" data-vm-next aria-label="Next photo">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5 7 7-7 7"/></svg>
+                                    </button>
+                                </div>
+
+                                <div class="vm-thumbs" aria-label="Choose a photo">
+                                    @foreach($photos as $photo)
+                                        <button
+                                            type="button"
+                                            class="vm-thumb"
+                                            data-vm-go="{{ $loop->index }}"
+                                            aria-label="Show photo {{ $loop->iteration }}"
+                                            @if($loop->first) aria-current="true" @endif
+                                        >
+                                            <img src="{{ asset($photo) }}" alt="" loading="lazy" draggable="false">
+                                        </button>
                                     @endforeach
                                 </div>
 
-                                <div class="vm-nav">
-                                    <button type="button" data-vm-prev aria-label="Previous photo">
-                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
-                                    </button>
-                                    <span class="vm-count" aria-live="polite" data-vm-count>1 / {{ count($photos) }}</span>
-                                    <button type="button" data-vm-next aria-label="Next photo">
-                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                                    </button>
-                                </div>
+                                <footer class="vm-foot">
+                                    @if($villa->price)
+                                        <p class="vm-price">
+                                            {{ $vStyle?->title }}
+                                            <strong>{{ number_format($villa->price) }}</strong>
+                                            <span>{{ $vStyle?->description }}</span>
+                                        </p>
+                                    @endif
+
+                                    <div class="vm-cta">
+                                        <a href="{{ $vmDetailsUrl }}" class="vm-btn vm-btn--ghost">
+                                            {{ $villa->button_text ?: ($vStyle?->button_text ?: 'View details') }}
+                                        </a>
+                                        <a href="{{ route('booking.villa', $vmSlug) }}" class="vm-btn vm-btn--solid">
+                                            {{ $vCheckLabel }}
+                                        </a>
+                                    </div>
+                                </footer>
 
                             </div>
                         </dialog>
@@ -217,6 +285,44 @@
                         @endif
 
 
+                        {{-- QUICK FACTS: only the ones filled in on the villa in the admin --}}
+
+                        @if(!empty($cardFacts))
+
+                            <ul class="villa-facts" aria-label="{{ $villa->title }} at a glance">
+
+                                @if(!empty($cardFacts['guests']))
+                                    <li>
+                                        <x-icon name="family" :size="18" />
+                                        <span>Sleeps {{ $cardFacts['guests'] }}</span>
+                                    </li>
+                                @endif
+
+                                @if(!empty($cardFacts['bedrooms']))
+                                    <li>
+                                        <x-icon name="bed" :size="18" />
+                                        <span>{{ $cardFacts['bedrooms'] }} {{ \Illuminate\Support\Str::plural('Bedroom', $cardFacts['bedrooms']) }}</span>
+                                    </li>
+                                @endif
+
+                                @if(!empty($cardFacts['bathrooms']))
+                                    <li>
+                                        <x-icon name="bath" :size="18" />
+                                        <span>{{ $cardFacts['bathrooms'] }} {{ \Illuminate\Support\Str::plural('Bathroom', $cardFacts['bathrooms']) }}</span>
+                                    </li>
+                                @endif
+
+                            </ul>
+
+                        @elseif($anyFacts)
+
+                            <ul class="villa-facts villa-facts--placeholder" aria-hidden="true">
+                                <li><x-icon name="family" :size="18" /><span>&nbsp;</span></li>
+                            </ul>
+
+                        @endif
+
+
                         @if($villa->price)
 
                             <p class="villa-price">
@@ -244,7 +350,7 @@
 
                             if (empty($villaFeatures)) {
                                 $villaFeatures = config(
-                                    'villas.' . \Illuminate\Support\Str::slug($villa->title) . '.card_features',
+                                    'villas.' . $cardSlug . '.card_features',
                                     []
                                 );
                             }
@@ -256,7 +362,7 @@
 
                                 @foreach($villaFeatures as $featureIndex => $feature)
                                     @php
-                                        $featureIconRow = $featureIconRows->first(fn ($row) => \Illuminate\Support\Str::slug($row->title ?? '') === \Illuminate\Support\Str::slug($villa->title ?? '') && (int) $row->sort_order === $featureIndex + 1);
+                                        $featureIconRow = $featureIconRows->first(fn ($row) => \Illuminate\Support\Str::slug($row->title ?? '') === $cardSlug && (int) $row->sort_order === $featureIndex + 1);
                                         $featureIcon = $featureIconRow?->icon;
                                     @endphp
 
@@ -277,17 +383,24 @@
                         @endif
 
 
-                        {{-- BUTTON --}}
+                        {{-- BUTTONS: always at the bottom of the card, so cards of different heights still line up --}}
 
-                        <a
-                            href="{{ filled($villa->button_url) && $villa->button_url !== '#' ? $villa->button_url : route('villas.show', \Illuminate\Support\Str::slug($villa->title)) }}"
-                            class="villa-button"
-                        >
+                        <div class="villa-actions">
 
-                            <span><x-glyph :value="$vStyle?->icon" :em="1.1" /></span>
-                            {{ $villa->button_text ?: $vStyle?->button_text }}
+                            <a href="{{ $cardDetailsUrl }}" class="villa-button">
 
-                        </a>
+                                <span><x-glyph :value="$vStyle?->icon" :em="1.1" /></span>
+                                {{ $villa->button_text ?: $vStyle?->button_text }}
+
+                            </a>
+
+                            <a href="{{ route('booking.villa', $cardSlug) }}" class="villa-button villa-button--ghost">
+
+                                {{ $vCheckLabel }}
+
+                            </a>
+
+                        </div>
 
                     </div>
 

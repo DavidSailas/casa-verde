@@ -19,6 +19,20 @@
 @endif
 
 @if ($cvw['chat'])
+    <style>
+        /* Chat button: gold pill only. No white box, halo or panel behind it. */
+        .cvw-chat { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; outline: 0 !important; }
+        .cvw-chat::before, .cvw-chat::after { content: none !important; display: none !important; }
+        .cvw-chat:not(.is-open) .cvw-panel { display: none !important; }
+        .cvw-toggle {
+            background: linear-gradient(135deg, #e6bb86, #d19a5b);
+            box-shadow: 0 10px 22px -12px rgba(6, 33, 27, .55);
+            outline: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .cvw-toggle:hover { background: linear-gradient(135deg, #edc592, #d9a366); box-shadow: 0 14px 24px -12px rgba(6, 33, 27, .6); }
+        .cvw-toggle:focus-visible { outline: 2px solid #06211b; outline-offset: 3px; box-shadow: 0 10px 22px -12px rgba(6, 33, 27, .55); }
+    </style>
     <div class="cvw-chat" data-cvw-chat>
         <section id="cvw-chat-panel" class="cvw-panel" role="dialog" aria-label="{{ $cvw['chat']['name'] }}" hidden>
             <header class="cvw-panel__head">

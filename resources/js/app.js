@@ -254,3 +254,22 @@ document.addEventListener('DOMContentLoaded', () => {
         touchStart = null;
     }, {passive:true});
 });
+
+
+// Admin: "Add another ..." shows the next hidden row of a list (villa highlights)
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-reveal-box]').forEach((box) => {
+        const more = box.querySelector('[data-reveal-more]');
+        if (!more) return;
+
+        more.addEventListener('click', () => {
+            const next = box.querySelector('[data-reveal-row].hidden');
+            if (!next) return;
+
+            next.classList.remove('hidden');
+            next.querySelector('input, select')?.focus();
+
+            if (!box.querySelector('[data-reveal-row].hidden')) more.classList.add('hidden');
+        });
+    });
+});

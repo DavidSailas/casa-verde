@@ -91,6 +91,9 @@
                     <div>
                         <label for="description" class="field-label">{{ $label('description', 'Description') }}</label>
                         <textarea id="description" name="description" rows="{{ $meta['rows']['description'] ?? 5 }}" class="field-input">{{ old('description', $item->description) }}</textarea>
+                        @if ($hint('description'))
+                            <p class="field-hint">{{ $hint('description') }}</p>
+                        @endif
                     </div>
                     @endif
 
@@ -98,7 +101,7 @@
                     <div>
                         <label for="features" class="field-label">{{ $label('features', 'Features') }}</label>
                         <textarea id="features" name="features" rows="4" placeholder="One feature per line" class="field-input">{{ old('features', is_array($item->features) ? implode("\n", $item->features) : '') }}</textarea>
-                        <p class="field-hint">Shown as a bullet list, one item per line, for example the amenities of a villa.</p>
+                        <p class="field-hint">{{ $hint('features') ?? 'Shown as a bullet list, one item per line, for example the amenities of a villa.' }}</p>
                     </div>
                     @endif
                 </div>
@@ -178,6 +181,213 @@
                 </div>
 
                 <p class="field-hint mt-4">Remove, add and reorder as you like, then press Save changes. Nothing changes on the live site until you save.</p>
+            </section>
+            @endif
+
+            @if (! empty($meta['villa_details']))
+            @php
+                // What the detail page shows now: this villa's saved content, else the starting content that came with the site.
+                $vd = $item->exists ? \App\Support\VillaDetails::for($item) : [];
+                $vdSlug = \Illuminate\Support\Str::slug((string) $item->title);
+
+                $vdHighlights = old('details.highlights');
+                if ($vdHighlights === null) {
+                    $vdHighlights = $vd['highlights'] ?? [];
+
+                    // Highlights edited earlier in "Villa highlights (icon row)" keep showing until this box is saved.
+                    if (! in_array('highlights', $vd['custom'] ?? [], true) && $vdSlug !== '') {
+                        $older = \App\Models\HomeContent::where('section', 'villas_highlights')->orderBy('sort_order')->get()
+                            ->filter(fn ($row) => \Illuminate\Support\Str::slug((string) $row->subtitle) === $vdSlug)
+                            ->map(fn ($row) => array_filter(['icon' => $row->icon, 'icon2' => $row->image, 'label' => $row->title]))
+                            ->values()->all();
+                        if ($older !== []) {
+                            $vdHighlights = $older;
+                        }
+                    }
+                }
+                $vdHighlights = array_values((array) $vdHighlights);
+                $vdFilled = count(array_filter($vdHighlights, fn ($row) => filled($row['label'] ?? null)));
+                $vdRows = 8;
+
+                $vdIcons = ['villa', 'family', 'couple', 'bed', 'queen-bed', 'beds', 'bath', 'jacuzzi', 'terrace', 'wifi', 'lotus', 'leaf',
+                    'sunset', 'island', 'tropical-home', 'privacy-lock', 'shield', 'coffee', 'breakfast', 'cutlery', 'wine', 'cocktail',
+                    'laptop', 'housekeeping', 'spaset', 'suitcase', 'calendar', 'snorkel'];
+
+                $vdAmenities = old('details.amenities');
+                if ($vdAmenities === null) {
+                    $vdAmenities = collect($vd['amenities'] ?? [])->map(fn ($column) => implode("\n", (array) $column))->all();
+                }
+                $vdStoryTitle = old('details.story_title', implode("\n", (array) ($vd['story_title'] ?? [])));
+                $vdStoryText = old('details.story_text', implode("\n\n", (array) ($vd['story_text'] ?? [])));
+                $vdIntro = old('details.intro', in_array('intro', $vd['custom'] ?? [], true) ? ($vd['intro'] ?? '') : '');
+                $vdBedrooms = old('details.bedrooms');
+                if ($vdBedrooms === null) {
+                    $vdBedrooms = $vd['bedrooms'] ?? [];
+                }
+                $vdBedrooms = array_values((array) $vdBedrooms);
+                $vdBedroomsFilled = count(array_filter($vdBedrooms, fn ($row) => filled($row['name'] ?? null) || filled($row['beds'] ?? null)));
+                $vdBedroomRows = 8;
+                $vdGuests = old('details.capacity.guests', $vd['capacity']['guests'] ?? '');
+                $vdBathrooms = old('details.capacity.bathrooms', $vd['capacity']['bathrooms'] ?? '');
+                $vdInterior = old('details.layout.interior', $vd['layout']['interior'] ?? '');
+                $vdTerrace = old('details.layout.terrace', $vd['layout']['terrace'] ?? '');
+                $vdHero = in_array('hero', $vd['custom'] ?? [], true) ? ($vd['hero'] ?? null) : null;
+                $vdPlan = $vd['layout']['plan'] ?? null;
+                $vdIconField = 'rounded-lg border border-sand-300 bg-white px-3 py-2 text-sm text-forest-900 focus:border-forest-700 focus:outline-none focus:ring-4 focus:ring-gold-400/40';
+            @endphp
+            <section class="panel" aria-labelledby="details-heading">
+                <h2 id="details-heading" class="section-title">Villa detail page</h2>
+                <p class="field-hint">Everything on this villa's own page (the one visitors reach from the “View” button). Leave a box empty to skip that part. The villa name, tagline, price and photos above are used too.</p>
+
+                <input type="hidden" name="details_present" value="1">
+
+                <div class="mt-6 space-y-8">
+
+                    <div>
+                        <label for="details_intro" class="field-label">Introduction</label>
+                        <textarea id="details_intro" name="details[intro]" rows="3" class="field-input">{{ $vdIntro }}</textarea>
+                        <p class="field-hint">Optional. Leave empty to use the Introduction written above.</p>
+                    </div>
+
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        <div>
+                            <label for="details_story_title" class="field-label">Story heading</label>
+                            <textarea id="details_story_title" name="details[story_title]" rows="2" class="field-input" placeholder="Designed for families.&#10;Made for togetherness.">{{ $vdStoryTitle }}</textarea>
+                            <p class="field-hint">One line per row; two short lines look best.</p>
+                        </div>
+                        <div>
+                            <label for="details_story_text" class="field-label">Story text</label>
+                            <textarea id="details_story_text" name="details[story_text]" rows="5" class="field-input">{{ $vdStoryText }}</textarea>
+                            <p class="field-hint">Leave an empty line between paragraphs. The photos beside it are the first three Gallery photos.</p>
+                        </div>
+                    </div>
+
+                    <fieldset data-reveal-box>
+                        <legend class="field-label">Highlights (icon row under the photo)</legend>
+                        <p class="field-hint">Up to 8. Pick an icon, type the label, and (only if you want two icons side by side) a second icon.</p>
+
+                        <div class="mt-3 space-y-3">
+                            @for ($i = 0; $i < $vdRows; $i++)
+                                @php
+                                    $row = $vdHighlights[$i] ?? [];
+                                    $hidden = $i >= max(4, $vdFilled + 1);
+                                @endphp
+                                <div data-reveal-row class="grid gap-2 sm:grid-cols-[11rem_minmax(0,1fr)_9rem] {{ $hidden ? 'hidden' : '' }}">
+                                    @foreach (['icon' => 'Icon', 'icon2' => '2nd icon'] as $key => $caption)
+                                        @php $current = trim((string) ($row[$key] ?? '')); @endphp
+                                        <select name="details[highlights][{{ $i }}][{{ $key }}]" aria-label="{{ $caption }} of highlight {{ $i + 1 }}"
+                                                class="{{ $vdIconField }} {{ $key === 'icon2' ? 'sm:order-3' : '' }}">
+                                            <option value="">{{ $key === 'icon' ? 'Choose an icon' : 'No 2nd icon' }}</option>
+                                            @foreach ($vdIcons as $name)
+                                                <option value="{{ $name }}" @selected($current === $name)>{{ $name }}</option>
+                                            @endforeach
+                                            @if ($current !== '' && ! in_array($current, $vdIcons, true))
+                                                <option value="{{ $current }}" selected>Current: {{ \Illuminate\Support\Str::limit($current, 24) }}</option>
+                                            @endif
+                                        </select>
+                                        @if ($key === 'icon')
+                                            <input type="text" name="details[highlights][{{ $i }}][label]" value="{{ $row['label'] ?? '' }}" maxlength="120"
+                                                   placeholder="Label, for example Two Bedrooms" aria-label="Label of highlight {{ $i + 1 }}"
+                                                   class="{{ $vdIconField }} sm:order-2">
+                                        @endif
+                                    @endforeach
+                                </div>
+                            @endfor
+                        </div>
+
+                        @if ($vdFilled < $vdRows)
+                            <button type="button" data-reveal-more class="btn-secondary mt-3">Add another highlight</button>
+                        @endif
+                    </fieldset>
+
+                    <fieldset data-reveal-box>
+                        <legend class="field-label">Bedrooms and sleeping arrangement</legend>
+                        <p class="field-hint">One row per bedroom, up to 8: the room name and its beds (for example “Bedroom 1” and “1 double bed”). The number of bedrooms shown on the villa card and page is counted from these rows, so add or remove a row and everything updates. Leave all rows empty to hide this part.</p>
+
+                        <div class="mt-3 space-y-3">
+                            @for ($i = 0; $i < $vdBedroomRows; $i++)
+                                @php
+                                    $room = $vdBedrooms[$i] ?? [];
+                                    $roomHidden = $i >= max(3, $vdBedroomsFilled + 1);
+                                @endphp
+                                <div data-reveal-row class="grid gap-2 sm:grid-cols-[12rem_minmax(0,1fr)] {{ $roomHidden ? 'hidden' : '' }}">
+                                    <input type="text" name="details[bedrooms][{{ $i }}][name]" value="{{ $room['name'] ?? '' }}" maxlength="80"
+                                           placeholder="Bedroom {{ $i + 1 }}" aria-label="Name of bedroom {{ $i + 1 }}"
+                                           class="{{ $vdIconField }}">
+                                    <input type="text" name="details[bedrooms][{{ $i }}][beds]" value="{{ $room['beds'] ?? '' }}" maxlength="120"
+                                           placeholder="Beds, for example 1 double bed" aria-label="Beds in bedroom {{ $i + 1 }}"
+                                           class="{{ $vdIconField }}">
+                                </div>
+                            @endfor
+                        </div>
+
+                        @if ($vdBedroomsFilled < $vdBedroomRows)
+                            <button type="button" data-reveal-more class="btn-secondary mt-3">Add another bedroom</button>
+                        @endif
+
+                        <div class="mt-5 grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <label for="details_guests" class="field-label">Sleeps (guests)</label>
+                                <input type="number" min="0" max="99" step="1" id="details_guests" name="details[capacity][guests]" value="{{ $vdGuests }}" class="field-input" placeholder="6">
+                            </div>
+                            <div>
+                                <label for="details_bathrooms" class="field-label">Bathrooms</label>
+                                <input type="number" min="0" max="99" step="1" id="details_bathrooms" name="details[capacity][bathrooms]" value="{{ $vdBathrooms }}" class="field-input" placeholder="2">
+                            </div>
+                        </div>
+                        <p class="field-hint">Shown as small facts on the villa card and the villa page. Leave empty to hide.</p>
+                    </fieldset>
+
+                    <div>
+                        <p class="field-label">Amenities</p>
+                        <p class="field-hint">Three columns on the page. One amenity per line.</p>
+                        <div class="mt-3 grid gap-4 sm:grid-cols-3">
+                            @foreach ([0 => 'Column 1', 1 => 'Column 2', 2 => 'Column 3'] as $i => $caption)
+                                <div>
+                                    <label for="details_amenities_{{ $i }}" class="field-label">{{ $caption }}</label>
+                                    <textarea id="details_amenities_{{ $i }}" name="details[amenities][{{ $i }}]" rows="6" class="field-input" placeholder="Air Conditioning&#10;Coffee &amp; Tea Station">{{ $vdAmenities[$i] ?? '' }}</textarea>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="field-label">Floor area (square metres)</p>
+                        <div class="mt-3 grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <label for="details_interior" class="field-label">Interior</label>
+                                <input type="number" min="0" step="1" id="details_interior" name="details[layout][interior]" value="{{ $vdInterior }}" class="field-input">
+                            </div>
+                            <div>
+                                <label for="details_terrace" class="field-label">Terrace</label>
+                                <input type="number" min="0" step="1" id="details_terrace" name="details[layout][terrace]" value="{{ $vdTerrace }}" class="field-input">
+                            </div>
+                        </div>
+                        <p class="field-hint">The total is worked out for you. Leave both empty to hide the floor area.</p>
+                    </div>
+
+                    <div class="grid gap-6 sm:grid-cols-2">
+                        @foreach ([
+                            ['key' => 'hero', 'file' => 'detail_hero', 'remove' => 'remove_detail_hero', 'path' => $vdHero, 'title' => 'Wide photo', 'hint' => 'The large picture at the top of the villa page. Empty uses the card photo.'],
+                            ['key' => 'plan', 'file' => 'detail_plan', 'remove' => 'remove_detail_plan', 'path' => $vdPlan, 'title' => 'Floor plan picture', 'hint' => 'Optional drawing shown beside the floor area.'],
+                        ] as $pic)
+                            <div>
+                                <p class="field-label">{{ $pic['title'] }}</p>
+                                @if ($pic['path'])
+                                    <img src="{{ asset($pic['path']) }}" alt="Current {{ strtolower($pic['title']) }}" class="mt-2 h-28 w-full rounded-lg border border-sand-300 bg-sand-100 object-cover">
+                                    <input type="hidden" name="details[{{ $pic['key'] }}]" value="{{ $pic['path'] }}">
+                                    <label class="mt-2 flex items-center gap-2 text-sm text-ink-soft">
+                                        <input type="checkbox" name="{{ $pic['remove'] }}" value="1"> Remove this picture
+                                    </label>
+                                @endif
+                                <input type="file" id="{{ $pic['file'] }}" name="{{ $pic['file'] }}" accept="image/jpeg,image/png,image/webp" class="field-input mt-3">
+                                <p class="field-hint">{{ $pic['hint'] }} JPG, PNG or WebP, up to 5 MB.</p>
+                                @error($pic['file'])<p class="mt-2 text-sm text-red-700" role="alert">{{ $message }}</p>@enderror
+                            </div>
+                        @endforeach
+                    </div>
+
+                </div>
             </section>
             @endif
 

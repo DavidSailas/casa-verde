@@ -1,0 +1,209 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@400;500&display=swap');
+
+/* =========================================================
+   DRINKS MENU (full-screen, opened from the Dining page)
+   Fixed forest header with category tabs, a sticky filter row,
+   and one scrolling area underneath, so the scrollbar never
+   runs down the header. Type is the site's own pair (Cormorant
+   Garamond + Jost). Every text class sets its own font because
+   theme.css restyles bare h1-h4 / p / li elements.
+========================================================= */
+
+.dm {
+    --dm-forest: #06211b;
+    --dm-forest-soft: #0e3629;
+    --dm-gold: #c9a06a;
+    --dm-gold-deep: #a47a44;
+    --dm-gold-text: #7a531f;
+    --dm-sand: #f7f2ea;
+    --dm-sand-deep: #ece2d0;
+    --dm-ink: #12241f;
+    --dm-muted: #4a5852;
+    --dm-line: rgba(6, 33, 27, .12);
+    --dm-serif: var(--cv-serif, 'Cormorant Garamond', Georgia, serif);
+    --dm-sans: var(--cv-sans, 'Jost', system-ui, -apple-system, 'Segoe UI', sans-serif);
+    --dm-pad: clamp(16px, 3vw, 32px);
+    --dm-sbw: 0px;     /* width of the menu's scrollbar, set by drinksmenu.js so the header lines up with the content */
+    --dm-sticky: 0px;  /* height of the sticky filter row, set by drinksmenu.js */
+
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    background: var(--dm-sand);
+    color: var(--dm-ink);
+    font-family: var(--dm-sans);
+    -webkit-font-smoothing: antialiased;
+}
+.dm[open] { animation: dm-in .3s ease-out; }
+@keyframes dm-in { from { opacity: 0; } to { opacity: 1; } }
+.dm::backdrop { background: rgba(4, 20, 16, .8); }
+.dm *, .dm *::before, .dm *::after { box-sizing: border-box; }
+.dm [hidden] { display: none !important; }
+
+/* While the menu is open the page behind it must not scroll, and must not keep the blank scrollbar
+   strip that theme.css reserves on <html> (it showed as an empty bar beside the menu). */
+html:has(dialog.dm[open]) { overflow: hidden; scrollbar-gutter: auto; }
+html:has(dialog.dm[open]) [data-cvw-chat] { display: none !important; }
+
+.dm-frame { display: flex; flex-direction: column; height: 100%; }
+
+/* ---------- Fixed header ---------- */
+.dm-bar {
+    flex: none;
+    position: relative;
+    z-index: 5;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: calc(var(--dm-sbw) + env(safe-area-inset-right, 0px));
+    background: var(--dm-forest);
+    color: #f4e3c4;
+    border-bottom: 1px solid rgba(201, 160, 106, .4);
+}
+.dm-bar-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; max-width: 1180px; margin: 0 auto; padding: 14px var(--dm-pad) 4px; }
+.dm-brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.dm-logo { flex: none; width: 44px; height: 44px; color: var(--dm-gold); }
+.dm-title { margin: 0; font-family: var(--dm-serif); font-size: clamp(1.6rem, 2.8vw, 2.1rem); font-weight: 600; line-height: 1.05; letter-spacing: .12em; text-transform: uppercase; color: #f4e3c4; }
+.dm-sub { margin: 5px 0 0; font-family: var(--dm-sans); font-size: .72rem; font-weight: 400; letter-spacing: .2em; line-height: 1.3; text-transform: uppercase; color: #d9c19a; }
+
+.dm-close { flex: none; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid rgba(244, 227, 196, .5); border-radius: 50%; background: transparent; color: #f4e3c4; cursor: pointer; transition: background .2s, color .2s, transform .2s; }
+.dm-close:hover { background: #f4e3c4; color: var(--dm-forest); transform: rotate(90deg); }
+.dm-close svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+.dm-close:focus-visible, .dm-tab:focus-visible { outline: 2px solid var(--dm-gold); outline-offset: 3px; }
+
+.dm-tabs { display: flex; gap: 4px; max-width: 1180px; margin: 0 auto; padding: 0 max(2px, calc(var(--dm-pad) - 14px)); overflow-x: auto; scrollbar-width: none; }
+.dm-tabs::-webkit-scrollbar { display: none; }
+.dm-tab { position: relative; flex: none; padding: 14px 14px 15px; font-family: var(--dm-sans); font-size: .95rem; font-weight: 500; line-height: 1.4; letter-spacing: .04em; color: #e6d3b0; text-decoration: none; white-space: nowrap; transition: color .2s; }
+.dm-tab::after { content: ''; position: absolute; left: 14px; right: 14px; bottom: 0; height: 3px; border-radius: 3px 3px 0 0; background: var(--dm-gold); transform: scaleX(0); transition: transform .25s ease; }
+.dm-tab:hover, .dm-tab.is-active { color: #fff; }
+.dm-tab.is-active::after { transform: scaleX(1); }
+
+/* ---------- The one scrolling area (slim, on-brand scrollbar) ---------- */
+.dm-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: var(--dm-gold-deep) var(--dm-sand-deep);
+}
+.dm-scroll:focus, .dm-scroll:focus-visible { outline: none; }
+
+/* Older Safari has no scrollbar-color: draw the same slim bar the WebKit way. */
+@supports not (scrollbar-color: auto) {
+    .dm-scroll::-webkit-scrollbar { width: 12px; }
+    .dm-scroll::-webkit-scrollbar-track { background: var(--dm-sand-deep); }
+    .dm-scroll::-webkit-scrollbar-thumb { border: 3px solid var(--dm-sand-deep); border-radius: 999px; background: var(--dm-gold-deep); }
+}
+
+/* ---------- Filters (stay in reach while scrolling) ---------- */
+.dm-filters-wrap { position: sticky; top: 0; z-index: 4; background: rgba(247, 242, 234, .95); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--dm-line); }
+.dm-filters { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; max-width: 1180px; margin: 0 auto; padding: 12px var(--dm-pad); }
+.dm-filters-label { margin-right: 4px; font-family: var(--dm-sans); font-size: .875rem; color: var(--dm-muted); }
+.dm-found { margin-left: 6px; font-family: var(--dm-sans); font-size: .875rem; font-weight: 500; color: var(--dm-gold-text); }
+.dm-chip { display: inline-flex; align-items: center; min-height: 40px; padding: 0 18px; border: 1px solid rgba(6, 33, 27, .28); border-radius: 999px; background: #fff; color: var(--dm-forest); font: 500 .875rem/1 var(--dm-sans); cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+.dm-chip:hover { border-color: var(--dm-forest); }
+.dm-chip.is-on { background: var(--dm-forest); border-color: var(--dm-forest); color: #f4e3c4; }
+.dm-chip:focus-visible, .dm-empty button:focus-visible, .dm-top:focus-visible { outline: 2px solid var(--dm-forest); outline-offset: 3px; }
+
+/* ---------- Body and section headings ---------- */
+.dm-body { max-width: 1180px; margin: 0 auto; padding: 0 var(--dm-pad) calc(56px + env(safe-area-inset-bottom, 0px)); }
+
+.dm-section { padding-top: 40px; scroll-margin-top: var(--dm-sticky); }
+.dm-section-head { display: flex; align-items: center; gap: 18px; margin-bottom: 22px; }
+.dm-section-head h3 { margin: 0; font-family: var(--dm-serif); font-size: clamp(1.5rem, 2.4vw, 1.9rem); font-weight: 600; line-height: 1.1; letter-spacing: .12em; text-transform: uppercase; color: var(--dm-forest); }
+.dm-rule { flex: 1; height: 1px; background: linear-gradient(90deg, var(--dm-gold), transparent); }
+.dm-count { font-family: var(--dm-sans); font-size: .875rem; color: var(--dm-muted); white-space: nowrap; }
+
+/* ---------- Drink text (shared by cards and list rows) ---------- */
+.dm-line { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.dm-name { margin: 0; font-family: var(--dm-serif); font-size: 1.4rem; font-weight: 600; line-height: 1.15; letter-spacing: .01em; text-transform: none; color: var(--dm-forest); }
+.dm-price { flex: none; margin: 0; font-family: var(--dm-sans); font-size: .95rem; font-weight: 500; line-height: 1.2; color: var(--dm-forest); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dm-price span { margin-right: 3px; font-size: .68rem; font-weight: 500; letter-spacing: .12em; color: var(--dm-gold-text); }
+.dm-desc { margin: 0; max-width: 52ch; font-family: var(--dm-sans); font-size: .95rem; font-weight: 400; line-height: 1.6; color: var(--dm-muted); }
+
+/* ---------- Photo cards ---------- */
+.dm-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 2vw, 24px); }
+.dm-card { display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--dm-line); border-radius: 14px; background: #fff; box-shadow: 0 1px 2px rgba(6, 33, 27, .04), 0 14px 28px -22px rgba(6, 33, 27, .45); }
+.dm-photo { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--dm-sand-deep); }
+.dm-photo img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+.dm-card:hover .dm-photo img { transform: scale(1.04); }
+/* No photo yet: a calm forest tile with a gold glass, instead of an empty beige box. */
+.dm-photo.is-empty { display: grid; place-items: center; aspect-ratio: 16 / 9; background: radial-gradient(120% 130% at 50% 0%, var(--dm-forest-soft), var(--dm-forest) 72%); color: var(--dm-gold); }
+.dm-photo.is-empty svg { width: 52px; height: 52px; }
+.dm-info { display: flex; flex: 1; flex-direction: column; gap: 8px; padding: 18px 20px 20px; }
+.dm-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: auto 0 0; padding: 8px 0 0; list-style: none; }
+.dm-tags li { margin: 0; padding: 5px 11px; border: 1px solid var(--dm-line); border-radius: 999px; background: var(--dm-sand); color: var(--dm-forest); font-family: var(--dm-sans); font-size: .75rem; line-height: 1.1; letter-spacing: .03em; }
+
+/* ---------- Compact list ---------- */
+.dm-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 72px; }
+.dm-row { padding: 16px 0 18px; border-bottom: 1px solid var(--dm-line); }
+.dm-row .dm-name { font-size: 1.3rem; }
+.dm-row .dm-desc { margin-top: 5px; }
+.dm-row .dm-line { justify-content: flex-start; }
+.dm-dots { flex: 1; min-width: 16px; border-bottom: 1.5px dotted rgba(164, 122, 68, .7); transform: translateY(-4px); }
+
+/* ---------- Empty state, footer ---------- */
+.dm-empty { margin: 0; padding: 60px 0; text-align: center; font-family: var(--dm-sans); font-size: 1rem; color: var(--dm-muted); }
+.dm-empty button { margin-left: 8px; padding: 0; border: 0; background: none; color: var(--dm-forest); font: 500 1rem var(--dm-sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.dm-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; margin-top: 52px; padding-top: 22px; border-top: 1px solid var(--dm-line); }
+.dm-note { margin: 0; font-family: var(--dm-sans); font-size: .875rem; color: var(--dm-muted); }
+.dm-top { padding: 8px 2px; border: 0; background: none; color: var(--dm-forest); font: 500 .875rem var(--dm-sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+
+/* ---------- Tablet / phone ---------- */
+@media (max-width: 980px) {
+    .dm-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .dm-list { grid-template-columns: 1fr; }
+}
+
+@media (pointer: coarse) {
+    .dm-chip { min-height: 44px; }
+}
+
+@media (max-width: 640px) {
+    .dm-bar-inner { padding-top: 12px; padding-bottom: 2px; }
+    .dm-logo { width: 34px; height: 34px; }
+    .dm-sub { display: none; }
+    .dm-tab { padding: 12px 12px 13px; font-size: .9rem; }
+    .dm-tab::after { left: 12px; right: 12px; }
+
+    /* On phones the filter row scrolls away with the menu so the drinks get the whole screen. */
+    .dm-filters-wrap { position: static; background: none; -webkit-backdrop-filter: none; backdrop-filter: none; border-bottom: 0; }
+    .dm-filters { flex-wrap: nowrap; overflow-x: auto; padding-top: 16px; padding-bottom: 0; scrollbar-width: none; }
+    .dm-filters::-webkit-scrollbar { display: none; }
+    .dm-filters-label, .dm-chip, .dm-found { flex: none; white-space: nowrap; }
+
+    .dm-section { padding-top: 30px; }
+    .dm-section-head { gap: 12px; margin-bottom: 16px; }
+    .dm-section-head h3 { font-size: 1.3rem; letter-spacing: .07em; }
+    .dm-rule { min-width: 16px; }
+    .dm-cards { grid-template-columns: 1fr; gap: 10px; }
+    .dm-card { flex-direction: row; border-radius: 12px; }
+    .dm-photo, .dm-photo.is-empty { flex: none; width: 96px; aspect-ratio: auto; min-height: 112px; }
+    .dm-photo.is-empty svg { width: 38px; height: 38px; }
+    .dm-info { padding: 12px 14px; gap: 5px; }
+    .dm-name, .dm-row .dm-name { font-size: 1.2rem; }
+    .dm-price { font-size: .9rem; }
+    .dm-desc { font-size: .9rem; line-height: 1.5; }
+    .dm-tags { padding-top: 4px; }
+    .dm-row { padding: 14px 0 16px; }
+}
+
+@media (max-width: 420px) {
+    .dm-count { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dm[open] { animation: none; }
+    .dm-photo img, .dm-tab::after, .dm-close { transition: none; }
+    .dm-card:hover .dm-photo img { transform: none; }
+}

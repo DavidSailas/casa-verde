@@ -209,5 +209,16 @@
 .cv-currency-control{position:fixed;bottom:18px;right:18px;z-index:900;background:#fff;color:#18372b;box-shadow:0 3px 20px #0002;border:1px solid #d7ded8;border-radius:12px;padding:9px 12px;display:flex;align-items:center;gap:9px;font:600 12px system-ui,sans-serif}
 .cv-currency-control select{background:transparent;color:inherit;border:0;font:600 13px system-ui,sans-serif;cursor:pointer;max-width:85px}
 @media(max-width:600px){.cv-currency-control{bottom:10px;right:10px;padding:7px 9px}}
+/* The floating currency box sat behind the chat button: hidden. The selector stays in the page so prices still convert to the visitor's currency. */
+.cv-currency-control{display:none !important}
+/* Site scrollbar: slim forest-green track with a gold thumb, matching the header and footer. */
+html{scrollbar-width:auto;scrollbar-color:#c9a06a #06211b}
+html::-webkit-scrollbar{width:12px;height:12px}
+html::-webkit-scrollbar-track{background:#06211b}
+html::-webkit-scrollbar-thumb{background:#c9a06a;border:3px solid #06211b;border-radius:999px;min-height:56px}
+html::-webkit-scrollbar-thumb:hover{background:#dfb987}
+html::-webkit-scrollbar-thumb:active{background:#b98b55}
+html::-webkit-scrollbar-corner{background:#06211b}
+@media(max-width:700px){html::-webkit-scrollbar{width:8px}html::-webkit-scrollbar-thumb{border-width:2px}}
 </style>
 <script defer src="{{ asset('js/casa-currency.js') }}?v=2" data-rates-url="{{ route('currency.rates') }}"></script>

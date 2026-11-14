@@ -17,7 +17,7 @@
 .exp-slide {
     grid-area: 1 / 1;
     width: var(--exp-w);
-    cursor: pointer;
+    cursor: default;
     transition: transform .8s cubic-bezier(.22, .8, .24, 1), opacity .6s ease;
     will-change: transform, opacity;
 }

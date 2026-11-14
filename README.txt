@@ -1,29 +1,9 @@
-CASA VERDE - HEADER JUMP FIX (scrollbar space)
-==============================================
-
-Cause: the fixed header is as wide as the page minus the scrollbar, so it shifts ~15px
-when you go from a short page (no scrollbar) to a long page (scrollbar).
-Fix: reserve the scrollbar space on every page (html { scrollbar-gutter: stable; }).
-
-OPTION A - replace the file
-  Extract this zip INTO the project folder (C:\Projects\casa-verde) and let it overwrite:
-      resources\css\theme.css
-  (Only use this if you have not edited theme.css yourself since your last push.)
-
-OPTION B - safest, keeps your own edits
-  Copy apply-scrollbar-fix.ps1 into the project folder and run:
-      powershell -ExecutionPolicy Bypass -File .\apply-scrollbar-fix.ps1
-
-THEN (both options)
-      npm run build
-      php artisan optimize:clear
-  Hard refresh (Ctrl+F5) and click between a short and a long page.
-
-Ship it
-      git add -A
-      git commit -m "Stop header jumping between pages (reserve scrollbar space)"
-      git push
-  Live server (cPanel Terminal):
-      git pull origin main
-      php artisan optimize:clear
-  Do not run npm on the server - public/build is committed.
+Menu book page-flip fix
+-----------------------
+1. Unzip this into your casa-verde project folder (the one containing app/, public/, resources/).
+   Say "Replace" when asked. It changes only 3 files:
+     resources/js/menubook.js                      (source)
+     public/build/assets/menubook-Cascade1x.js     (compiled copy the site loads)
+     public/build/manifest.json                    (points to the new file)
+2. If you run "npm run dev", stop it and start it again.
+3. Hard refresh the dining page: Ctrl + Shift + R.

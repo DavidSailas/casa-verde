@@ -1596,10 +1596,6 @@ body {
     transition: transform 0.5s ease;
 }
 
-.dining-card:hover img {
-    transform: scale(1.05);
-}
-
 
 /* =========================================
    CARD TITLE
@@ -4169,3 +4165,38 @@ body {
 
 /* Find us: live Google Map (satellite) instead of a photo */
 .contact-map iframe { display: block; width: 100%; height: 100%; border: 0; }
+
+
+/* =========================================
+   HOME PAGE: PICTURES ARE DISPLAY-ONLY
+   Only buttons and links are interactive.
+========================================= */
+
+.villa-card img,
+.experience-card img,
+.wellness-main-image img,
+.wellness-card-image img,
+.dining-main-image img,
+.dining-card-image img,
+.long-stay-image img,
+.about-hero-image,
+.about-resort-image img,
+.contact-hero-image {
+    cursor: default;
+    -webkit-user-drag: none;
+    user-select: none;
+}
+
+/* Clear keyboard focus on every button (the gold ring is invisible on gold buttons) */
+.primary-button:focus-visible,
+.secondary-button:focus-visible,
+.villa-button:focus-visible,
+.discover-button:focus-visible,
+.wellness-button:focus-visible,
+.dining-button:focus-visible,
+.long-stay-button:focus-visible,
+.long-stay-booking:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 5px rgba(0, 0, 0, .45);
+}

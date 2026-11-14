@@ -44,13 +44,19 @@
     $labels    = \App\Models\HomeContent::pageLabels($contents, 'villas_detail_labels');
     $L         = fn (int $n) => $labels[$n] ?? '';
     // Highlight icons: entries saved in the admin for this villa, else config/villas.php.
-    $highlights = $contents->get('villas_highlights', collect())
-        ->filter(fn ($row) => \Illuminate\Support\Str::slug((string) $row->subtitle) === \Illuminate\Support\Str::slug($villa->title))
-        ->map(fn ($row) => ['icon' => $row->icon ?: 'lotus', 'icon2' => $row->image ?: null, 'label' => $row->title])
-        ->values()->all();
+    // Highlights set on the villa entry win; else the older icon-row entries; else config/villas.php.
+    $highlights = in_array('highlights', $detail['custom'] ?? [], true)
+        ? $detail['highlights']
+        : $contents->get('villas_highlights', collect())
+            ->filter(fn ($row) => \Illuminate\Support\Str::slug((string) $row->subtitle) === \Illuminate\Support\Str::slug($villa->title))
+            ->map(fn ($row) => ['icon' => $row->icon ?: 'lotus', 'icon2' => $row->image ?: null, 'label' => $row->title])
+            ->values()->all();
     if ($highlights === []) {
         $highlights = $detail['highlights'] ?? [];
     }
+    // Bedrooms and quick facts: only what is filled in on the villa entry in the admin.
+    $rooms = $detail['bedrooms'] ?? [];
+    $facts = $detail['capacity'] ?? [];
 @endphp
 
 <main class="vs-page">
@@ -76,6 +82,20 @@
             @endif
 
             <p class="vs-intro">{{ $intro }}</p>
+
+            @if(!empty($facts))
+                <ul class="vs-facts" aria-label="{{ $villa->title }} at a glance">
+                    @if(!empty($facts['guests']))
+                        <li><x-icon name="family" :size="18" /> Sleeps {{ $facts['guests'] }}</li>
+                    @endif
+                    @if(!empty($facts['bedrooms']))
+                        <li><x-icon name="bed" :size="18" /> {{ $facts['bedrooms'] }} {{ \Illuminate\Support\Str::plural('Bedroom', $facts['bedrooms']) }}</li>
+                    @endif
+                    @if(!empty($facts['bathrooms']))
+                        <li><x-icon name="bath" :size="18" /> {{ $facts['bathrooms'] }} {{ \Illuminate\Support\Str::plural('Bathroom', $facts['bathrooms']) }}</li>
+                    @endif
+                </ul>
+            @endif
 
             @if($villa->price)
                 <p class="vs-price">
@@ -171,6 +191,44 @@
                     >
                 </figure>
             @endforeach
+
+        </section>
+    @endif
+
+
+    {{-- =====================================================
+         BEDROOMS + SLEEPING ARRANGEMENT (from the villa entry in the admin)
+    ====================================================== --}}
+
+    @if(!empty($rooms))
+        <section class="vs-rooms" aria-labelledby="vs-rooms-title">
+
+            <div class="vs-rooms-head">
+                <h3 id="vs-rooms-title">{{ $L(11) ?: 'Bedrooms & sleeping arrangement' }}</h3>
+                @if(!empty($facts))
+                    <p>
+                        {{ collect([
+                            !empty($facts['bedrooms']) ? $facts['bedrooms'].' '.\Illuminate\Support\Str::plural('bedroom', $facts['bedrooms']) : null,
+                            !empty($facts['guests']) ? 'sleeps '.$facts['guests'] : null,
+                            !empty($facts['bathrooms']) ? $facts['bathrooms'].' '.\Illuminate\Support\Str::plural('bathroom', $facts['bathrooms']) : null,
+                        ])->filter()->implode(' · ') }}
+                    </p>
+                @endif
+            </div>
+
+            <ol class="vs-rooms-list">
+                @foreach($rooms as $room)
+                    <li>
+                        <span class="vs-room-num" aria-hidden="true">{{ $loop->iteration }}</span>
+                        <div>
+                            <strong>{{ $room['name'] }}</strong>
+                            @if(!empty($room['beds']))
+                                <span>{{ $room['beds'] }}</span>
+                            @endif
+                        </div>
+                    </li>
+                @endforeach
+            </ol>
 
         </section>
     @endif

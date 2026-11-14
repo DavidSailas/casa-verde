@@ -7,13 +7,16 @@
     $dishCount = count($page['dishes']);
     $brand = $page['brand'] ?? ['text' => 'Casa Verde Cliff Resort & Spa', 'icon' => ''];
     $logo = trim((string) ($brand['icon'] ?? '')) !== '' ? $brand['icon'] : 'lotus';
+    // Long category names ("Burgers and Sandwiches") get a smaller heading so they stay on one line.
+    $headingLength = mb_strlen(trim((string) $page['heading']));
+    $headingSize = $headingLength > 18 ? 'xl' : ($headingLength > 12 ? 'lg' : '');
 @endphp
 <div class="mbp" data-count="{{ $dishCount }}">
     @if(trim((string) ($page['kicker'] ?? '')) !== '')
         <p class="mbp-kicker">{{ $page['kicker'] }}</p>
     @endif
     @if(trim((string) $page['heading']) !== '')
-        <h3 class="mbp-title">{{ $page['heading'] }}</h3>
+        <h3 class="mbp-title{{ $headingSize ? ' mbp-title--'.$headingSize : '' }}">{{ $page['heading'] }}</h3>
     @endif
     <div class="mbp-rule" aria-hidden="true">@include('partials.menu-ornament')</div>
 
@@ -26,16 +29,25 @@
                     @endif
                 </div>
                 <div class="mbp-text">
-                    <h4 class="mbp-name">
-                        <span>{{ $dish['name'] }}@if($dish['price'] !== '') <span class="mbp-price">{{ $dish['price'] }}</span>@endif</span>
-                        @foreach($dish['icons'] as $icon)
-                            @if($icon['image'])
-                                <img class="mbp-diet mbp-diet--img" src="{{ asset($icon['image']) }}" alt="{{ $icon['label'] }}" draggable="false">
-                            @else
-                                <svg class="mbp-diet" viewBox="0 0 24 24" fill="currentColor" aria-label="{{ $icon['label'] }}" role="img">{!! $icon['svg'] !!}</svg>
+                    <h4 class="mbp-name">{{ $dish['name'] }}</h4>
+                    @if($dish['price'] !== '' || !empty($dish['icons']))
+                        <p class="mbp-meta">
+                            @if($dish['price'] !== '')
+                                <span class="mbp-price">{{ $dish['price'] }}</span>
                             @endif
-                        @endforeach
-                    </h4>
+                            @if(!empty($dish['icons']))
+                                <span class="mbp-diets">
+                                    @foreach($dish['icons'] as $icon)
+                                        @if($icon['image'])
+                                            <img class="mbp-diet mbp-diet--img" src="{{ asset($icon['image']) }}" alt="{{ $icon['label'] }}" draggable="false">
+                                        @else
+                                            <svg class="mbp-diet" viewBox="0 0 24 24" fill="currentColor" aria-label="{{ $icon['label'] }}" role="img">{!! $icon['svg'] !!}</svg>
+                                        @endif
+                                    @endforeach
+                                </span>
+                            @endif
+                        </p>
+                    @endif
                     @if(trim((string) $dish['text']) !== '')
                         <p class="mbp-desc">{{ $dish['text'] }}</p>
                     @endif

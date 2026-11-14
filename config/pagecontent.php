@@ -246,6 +246,50 @@ Every meal becomes a memory.',
         ['title' => 'Menu: Appetizer, Soup and Salad', 'subtitle' => '', 'image' => 'images/dining/menu/pages/menu-appetizer-soup-salad.jpg'],
     ],
 
+    // The drinks menu, opened by the EXPLORE DRINKS MENU button. Starting content only: it is loaded into the
+    // admin (Dining > Drinks menu) and edited there. Prices and photos are left empty for you to fill in.
+    // Settings: "title" = menu title, "subtitle" = line under it, "button_text" = currency, "description" = note at the bottom.
+    'dining_page_drinks_menu' => [
+        [
+            'title' => 'Drinks Menu',
+            'subtitle' => 'Casa Verde Cliff Resort & Spa',
+            'button_text' => 'PHP',
+            'description' => 'Prices are in Philippine pesos (PHP). Please drink responsibly.',
+        ],
+    ],
+
+    // Categories: "title" = name, "subtitle" = layout (cards, list, or empty = automatic).
+    'dining_page_drinks_categories' => [
+        ['title' => 'Signature Cocktails', 'subtitle' => 'cards'],
+        ['title' => 'Classic Cocktails', 'subtitle' => 'list'],
+        ['title' => 'Alcohol-free', 'subtitle' => 'list'],
+    ],
+
+    // Filter buttons: a filter shows the drinks that carry the same word in their tags.
+    'dining_page_drinks_filters' => [
+        ['title' => 'Alcohol-free'],
+        ['title' => 'Spirits'],
+        ['title' => 'Wine'],
+        ['title' => 'Beer'],
+    ],
+
+    // Drinks: "subtitle" is the category (its name here; the admin stores the category itself), "features" the tags.
+    'dining_page_drinks_items' => [
+        ['title' => 'Casa Verde Sunset', 'subtitle' => 'Signature Cocktails', 'features' => ['Spirits', 'Rum', 'Citrus'], 'description' => 'Rum, calamansi, mango and soda over crushed ice.'],
+        ['title' => 'Cliff Lounge Spritz', 'subtitle' => 'Signature Cocktails', 'features' => ['Wine', 'Sparkling'], 'description' => 'Sparkling wine, bitter orange and soda, served long.'],
+        ['title' => 'Camotes Cooler', 'subtitle' => 'Signature Cocktails', 'features' => ['Alcohol-free', 'Fresh'], 'description' => 'Coconut water, lime, mint and cucumber.'],
+        ['title' => 'Mojito', 'subtitle' => 'Classic Cocktails', 'features' => ['Spirits'], 'description' => 'White rum, mint, lime and soda.'],
+        ['title' => 'Margarita', 'subtitle' => 'Classic Cocktails', 'features' => ['Spirits'], 'description' => 'Tequila, triple sec and lime, salted rim.'],
+        ['title' => 'Piña Colada', 'subtitle' => 'Classic Cocktails', 'features' => ['Spirits'], 'description' => 'Rum, coconut cream and pineapple.'],
+        ['title' => 'Old Fashioned', 'subtitle' => 'Classic Cocktails', 'features' => ['Spirits'], 'description' => 'Whiskey, bitters and sugar over a large cube.'],
+        ['title' => 'Espresso Martini', 'subtitle' => 'Classic Cocktails', 'features' => ['Spirits'], 'description' => 'Vodka, coffee liqueur and fresh espresso.'],
+        ['title' => 'Negroni', 'subtitle' => 'Classic Cocktails', 'features' => ['Spirits'], 'description' => 'Gin, vermouth and bitter aperitif.'],
+        ['title' => 'Fresh Mango Shake', 'subtitle' => 'Alcohol-free', 'features' => ['Alcohol-free'], 'description' => 'Ripe mango, ice and milk.'],
+        ['title' => 'Calamansi Juice', 'subtitle' => 'Alcohol-free', 'features' => ['Alcohol-free'], 'description' => 'Freshly squeezed, served over ice.'],
+        ['title' => 'Iced Coffee', 'subtitle' => 'Alcohol-free', 'features' => ['Alcohol-free'], 'description' => 'Cold brew with milk or on its own.'],
+        ['title' => 'Sparkling Water', 'subtitle' => 'Alcohol-free', 'features' => ['Alcohol-free'], 'description' => 'Chilled bottle, with lime.'],
+    ],
+
     'experiences_page_hero' => [
         [
             'subtitle' => 'EXPERIENCES',

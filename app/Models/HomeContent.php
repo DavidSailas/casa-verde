@@ -21,6 +21,7 @@ class HomeContent extends Model
         'price',
         'features',
         'gallery',
+        'details',
         'button_text',
         'button_url',
         'sort_order',
@@ -31,6 +32,7 @@ class HomeContent extends Model
         'price' => 'decimal:2',
         'active' => 'boolean',
         'gallery' => 'array',
+        'details' => 'array',
     ];
 
     /**

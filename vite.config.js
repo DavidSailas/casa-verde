@@ -21,6 +21,8 @@ export default defineConfig({
                 'resources/css/dining.css',
                 'resources/css/menubook.css',
                 'resources/js/menubook.js',
+                'resources/css/drinksmenu.css',
+                'resources/js/drinksmenu.js',
                 'resources/css/theme.css',
                 'resources/css/about.css',
                 'resources/css/contact.css',

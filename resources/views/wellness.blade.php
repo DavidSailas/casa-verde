@@ -185,6 +185,90 @@
 }
     </style>
 
+    <style>
+        /* Wellness page: refined styling on top of the rules above. Text, icons and layout are unchanged. */
+        .wellness-page {
+            --wl-forest: #06211b;
+            --wl-gold: #c9a06a;
+            --wl-line: rgba(201, 160, 106, .55);
+            background: #f7f2ea;
+        }
+
+        /* Hero: full width, photo reaches the right edge and fades into the cream text panel */
+        .wellness-page .wellness-hero { max-width: none; margin: 0; min-height: 400px; padding-top: 96px; background: #f7f2ea; }
+        .wellness-page .wellness-hero::after {
+            content: "";
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            height: 1px;
+            z-index: 2;
+            background: linear-gradient(90deg, transparent, var(--wl-line) 20%, var(--wl-line) 80%, transparent);
+        }
+        .wellness-page .wellness-hero-image {
+            width: 66%;
+            -webkit-mask-image: linear-gradient(to right, transparent 0, rgba(0, 0, 0, .55) 16%, #000 40%);
+                    mask-image: linear-gradient(to right, transparent 0, rgba(0, 0, 0, .55) 16%, #000 40%);
+        }
+        .wellness-page .wellness-hero-image img { object-position: 62% 40%; }
+        .wellness-page .wellness-introduction { width: min(52%, 640px); min-height: 300px; padding: 40px 30px 40px clamp(28px, 6vw, 110px); display: flex; flex-direction: column; justify-content: center; }
+        .wellness-page .wellness-label { margin: 0 0 14px; font-size: .95rem; font-weight: 500; letter-spacing: .32em; color: #b98b55; }
+        .wellness-page .wellness-label::after { content: ""; display: block; width: 54px; height: 1px; margin-top: 10px; background: var(--wl-gold); }
+        .wellness-page .wellness-introduction h1 { font-size: clamp(2.2rem, 3.5vw, 3.3rem); font-weight: 600; line-height: 1.06; color: var(--wl-forest); }
+        .wellness-page .wellness-description { margin-top: 22px; max-width: 440px; font-size: 1.2rem; line-height: 1.55; color: #31443f; }
+
+        /* Treatment cards */
+        .wellness-page .wellness-services { gap: 18px; padding: 30px 28px 26px; }
+        .wellness-page .wellness-card-image {
+            border-radius: 20px;
+            box-shadow: 0 18px 30px -20px rgba(6, 33, 27, .7), 0 0 0 1px rgba(201, 160, 106, .35);
+        }
+        .wellness-page .wellness-card { transition: transform .35s ease; }
+        .wellness-page .wellness-card:hover { transform: translateY(-4px); }
+        .wellness-page .wellness-card-content { padding: 18px 10px 0; }
+        .wellness-page .wellness-card-content h2 { font-size: 1.15rem; letter-spacing: .01em; color: var(--wl-forest); margin-bottom: 6px; }
+        .wellness-page .wellness-card-content p { font-size: 1.02rem; line-height: 1.4; color: #4a5852; }
+
+        /* Feature strip */
+        .wellness-page .wellness-features { margin: 0 28px; padding: 26px 0 36px; border-top: 0; position: relative; gap: 24px; }
+        .wellness-page .wellness-features::before {
+            content: "";
+            position: absolute;
+            left: 0; right: 0; top: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--wl-line) 15%, var(--wl-line) 85%, transparent);
+        }
+        .wellness-page .feature-icon { width: 56px; height: 56px; color: #c98f4f; }
+        .wellness-page .feature-item h3 { font-size: 1.12rem; color: var(--wl-forest); }
+        .wellness-page .feature-item p { font-size: 1.02rem; line-height: 1.4; color: #4a5852; }
+        .wellness-page .spa-menu-button {
+            min-height: 56px;
+            padding: 0 34px;
+            background: var(--wl-forest);
+            color: #e6c28f;
+            border: 1.5px solid var(--wl-forest);
+            font-weight: 700;
+            letter-spacing: .12em;
+            box-shadow: 0 16px 26px -16px rgba(6, 33, 27, .85);
+        }
+        .wellness-page .spa-menu-button:hover { background: var(--wl-gold); border-color: var(--wl-gold); color: var(--wl-forest); }
+        .wellness-page .spa-menu-button:focus-visible { outline: 2px solid var(--wl-gold); outline-offset: 4px; }
+
+        @media (max-width: 1100px) {
+            .wellness-page .wellness-introduction { width: min(58%, 640px); padding-left: clamp(24px, 5vw, 60px); }
+            .wellness-page .wellness-hero-image { width: 62%; }
+        }
+        @media (max-width: 768px) {
+            .wellness-page .wellness-hero { min-height: 0; padding-top: 76px; }
+            .wellness-page .wellness-introduction { width: 100%; min-height: 0; padding: 32px 24px 170px; }
+            .wellness-page .wellness-hero-image { width: 100%; }
+            .wellness-page .wellness-services { grid-template-columns: 1fr 1fr; gap: 22px 14px; padding: 26px 18px; }
+            .wellness-page .wellness-features { margin: 0 18px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .wellness-page *, .wellness-page *::before, .wellness-page *::after { transition: none !important; }
+        }
+    </style>
+
 </head>
 
 <body>

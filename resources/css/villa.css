@@ -106,19 +106,29 @@ body {
 
 /* =========================================================
    VILLA GRID
+   Cards sit in a centred, wrapping row: three across on a wide
+   screen, two on a tablet, one on a phone. Any number of villas
+   added in the admin works: an unfinished last row is centred
+   and every card in a row has the same height.
 ========================================================= */
 
 .villa-container {
 
-    max-width: 1080px;
+    --villa-gap: clamp(20px, 2.4vw, 36px);
+
+    max-width: 1240px;
 
     margin: auto;
 
-    display: grid;
+    display: flex;
 
-    grid-template-columns: repeat(2, 1fr);
+    flex-wrap: wrap;
 
-    gap: 70px;
+    justify-content: center;
+
+    align-items: stretch;
+
+    gap: var(--villa-gap);
 }
 
 
@@ -128,21 +138,49 @@ body {
 
 .villa-card {
 
+    flex: 0 1 calc((100% - 2 * var(--villa-gap)) / 3);
+
+    min-width: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    overflow: hidden;
+
+    border-radius: 18px;
+
+    background: var(--white);
+
+    border: 1px solid rgba(0, 61, 53, .08);
+
+    box-shadow: 0 18px 40px -28px rgba(0, 45, 40, .55);
+
     text-align: center;
+
+    transition: transform .3s ease, box-shadow .3s ease;
+}
+
+
+.villa-card:hover {
+
+    transform: translateY(-4px);
+
+    box-shadow: 0 26px 46px -28px rgba(0, 45, 40, .65);
 }
 
 
 .villa-image-wrapper {
 
+    position: relative;
+
+    display: block;
+
     width: 100%;
 
-    height: 320px;
+    aspect-ratio: 4 / 3;
 
     overflow: hidden;
-
-    border-radius: 10px;
-
-    margin-bottom: 25px;
 
     background: #ddd;
 }
@@ -172,15 +210,31 @@ body {
    VILLA CONTENT
 ========================================================= */
 
+.villa-content {
+
+    flex: 1;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    padding: 22px clamp(18px, 2vw, 28px) 26px;
+}
+
+
 .villa-content h2 {
 
     color: var(--green);
 
-    font-size: 24px;
+    font-size: clamp(21px, 1.9vw, 26px);
 
     font-weight: 400;
 
-    margin-bottom: 7px;
+    line-height: 1.2;
+
+    margin-bottom: 6px;
 }
 
 
@@ -202,19 +256,83 @@ body {
 
     font-style: italic;
 
-    margin-bottom: 9px;
+    line-height: 1.4;
+
+    margin-bottom: 14px;
+}
+
+
+/* Quick facts: sleeps / bedrooms / bathrooms (only the ones filled in the admin). */
+
+.villa-facts {
+
+    list-style: none;
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    margin: 0 0 16px;
+}
+
+
+.villa-facts li {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 6px 12px;
+
+    border-radius: 999px;
+
+    background: var(--cream);
+
+    color: var(--green);
+
+    font-family: Arial, sans-serif;
+
+    font-size: 12px;
+
+    line-height: 1;
+
+    white-space: nowrap;
+}
+
+
+.villa-facts .cv-icon {
+
+    width: 18px;
+
+    height: 18px;
+
+    color: var(--dark-gold);
 }
 
 
 .villa-price {
+
+    width: 100%;
+
+    padding: 12px 0;
+
+    margin-bottom: 16px;
+
+    border-top: 1px solid rgba(189, 134, 68, .28);
+
+    border-bottom: 1px solid rgba(189, 134, 68, .28);
 
     color: #53605b;
 
     font-family: Arial, sans-serif;
 
     font-size: 13px;
-
-    margin-bottom: 20px;
 }
 
 
@@ -222,7 +340,7 @@ body {
 
     color: var(--green);
 
-    font-size: 17px;
+    font-size: 21px;
 }
 
 
@@ -240,9 +358,11 @@ body {
 
     list-style: none;
 
-    max-width: 390px;
+    width: 100%;
 
-    margin: 0 auto 25px;
+    max-width: 330px;
+
+    margin: 0 auto 22px;
 
     text-align: left;
 }
@@ -254,7 +374,7 @@ body {
 
     align-items: center;
 
-    gap: 12px;
+    gap: 14px;
 
     margin-bottom: 10px;
 
@@ -263,6 +383,8 @@ body {
     font-family: Arial, sans-serif;
 
     font-size: 13px;
+
+    line-height: 1.4;
 }
 
 
@@ -274,7 +396,11 @@ body {
 
     justify-content: center;
 
-    width: 25px;
+    width: 34px;
+
+    min-width: 34px;
+
+    height: 34px;
 
     color: var(--gold);
 
@@ -282,9 +408,37 @@ body {
 }
 
 
+.villa-features .feature-icon .cv-icon {
+
+    width: 30px;
+
+    height: 30px;
+
+    object-fit: contain;
+
+    stroke-width: 1.15;
+}
+
+
 /* =========================================================
-   VILLA BUTTON
+   VILLA BUTTONS
+   Pinned to the bottom of the card, so a card with a shorter
+   (or longer) list still lines up with its neighbours.
 ========================================================= */
+
+.villa-actions {
+
+    margin-top: auto;
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    justify-content: center;
+
+    gap: 10px;
+}
+
 
 .villa-button {
 
@@ -292,11 +446,15 @@ body {
 
     align-items: center;
 
-    gap: 9px;
+    justify-content: center;
 
-    padding: 12px 23px;
+    gap: 8px;
+
+    padding: 12px 22px;
 
     border-radius: 30px;
+
+    border: 1px solid var(--green);
 
     background: var(--green);
 
@@ -309,6 +467,8 @@ body {
     font-size: 11px;
 
     font-weight: bold;
+
+    letter-spacing: .03em;
 
     transition: .25s ease;
 }
@@ -326,7 +486,33 @@ body {
 
     background: #00564a;
 
+    border-color: #00564a;
+
     transform: translateY(-2px);
+}
+
+
+.villa-button--ghost {
+
+    background: transparent;
+
+    color: var(--green);
+}
+
+
+.villa-button--ghost:hover {
+
+    background: var(--green);
+
+    color: white;
+}
+
+
+.villa-button:focus-visible {
+
+    outline: 2px solid var(--gold);
+
+    outline-offset: 3px;
 }
 
 
@@ -570,22 +756,6 @@ body {
     }
 
 
-    .villa-container {
-
-        grid-template-columns: 1fr;
-
-        gap: 55px;
-
-    }
-
-
-    .villa-image-wrapper {
-
-        height: 260px;
-
-    }
-
-
     .villa-bottom-content {
 
         flex-direction: column;
@@ -618,25 +788,13 @@ body {
     }
 
 }
-/* Screenshot-matched villas layout (desktop), preserving mobile stacking. */
+/* Desktop: a more compact page header, and a compact bottom bar. */
 @media (min-width: 801px) {
-  .villas-section { min-height: 0; padding: 8px 5.5% 10px; }
-  .villas-header { max-width: 650px; margin: 0 auto 9px; }
-  .villas-header .section-label { font-size: 13px; letter-spacing: .4px; margin-bottom: 0; }
-  .villas-header h1 { font-size: clamp(29px, 3.35vw, 43px); line-height: 1.08; margin-bottom: 5px; }
-  .villas-header .section-description { max-width: 340px; font-size: 11px; line-height: 1.45; }
-  .villa-container { max-width: 1200px; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7.5%; }
-  .villa-image-wrapper { height: clamp(150px, 16.3vw, 235px); margin-bottom: 5px; border-radius: 11px; }
-  .villa-content h2 { font-size: 19px; line-height: 1.2; margin-bottom: 2px; }
-  .villa-symbol { display: none; }
-  .villa-tagline { font-size: 12px; margin-bottom: 1px; }
-  .villa-price { font-size: 12px; margin-bottom: 5px; }
-  .villa-price strong { font-size: 13px; }
-  .villa-price span { font-size: 11px; }
-  .villa-features { max-width: 270px; margin-bottom: 8px; }
-  .villa-features li { font-size: 10px; gap: 10px; margin-bottom: 4px; }
-  .feature-icon { width: 25px; min-width: 25px; font-size: 19px; }
-  .villa-button { padding: 7px 13px; font-size: 10px; gap: 5px; }
+  .villas-section { min-height: 0; padding: 36px 5.5% 56px; }
+  .villas-header { max-width: 650px; margin: 0 auto 34px; }
+  .villas-header .section-label { font-size: 13px; letter-spacing: .4px; margin-bottom: 4px; }
+  .villas-header h1 { font-size: clamp(32px, 3.35vw, 46px); line-height: 1.08; margin-bottom: 8px; }
+  .villas-header .section-description { max-width: 440px; font-size: 13px; line-height: 1.55; }
   .villa-bottom { padding: 9px 5.5%; }
   .villa-bottom-content { gap: 17px; }
   .bottom-intro { min-width: 190px; }
@@ -647,12 +805,105 @@ body {
   .bottom-divider { height: 33px; }
 }
 
-/* Villa feature artwork: larger fine-line icons, matching the supplied reference. */
-.villa-features li { align-items: center; gap: 18px; }
-.villa-features .feature-icon { width: 42px; min-width: 42px; height: 38px; color: #d8a15d; }
-.villa-features .feature-icon .cv-icon { width: 36px; height: 36px; stroke-width: 1.15; object-fit: contain; }
-@media (max-width: 700px) {
-  .villa-features li { gap: 12px; }
-  .villa-features .feature-icon { width: 32px; min-width: 32px; height: 32px; }
-  .villa-features .feature-icon .cv-icon { width: 29px; height: 29px; }
+/* Tablet: two cards across (a lone last card is centred). */
+@media (max-width: 1000px) {
+  .villa-card { flex-basis: calc((100% - var(--villa-gap)) / 2); }
+}
+
+/* Phone: one card across. */
+@media (max-width: 640px) {
+  .villa-card { flex-basis: 100%; }
+  .villa-actions { width: 100%; }
+  .villa-actions .villa-button { flex: 1 1 100%; }
+  .villa-features { max-width: none; }
+}
+
+
+/* =========================================================
+   VILLAS PAGE: card polish
+   Scoped to .villas-section so the Home page cards are untouched.
+========================================================= */
+
+.villas-section .villa-card {
+    border-radius: 22px;
+    border-color: rgba(6, 33, 27, .07);
+    box-shadow: 0 1px 2px rgba(6, 33, 27, .05), 0 24px 44px -30px rgba(6, 33, 27, .55);
+}
+.villas-section .villa-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 1px 2px rgba(6, 33, 27, .05), 0 32px 52px -30px rgba(6, 33, 27, .6);
+}
+
+/* Photo: no double rounding or shadow inside the card, same height on every card. */
+.villas-section .villa-image-wrapper { aspect-ratio: 3 / 2; }
+.villas-section .villa-image { border-radius: 0; box-shadow: none; }
+
+.villas-section .villa-content { padding: 24px clamp(20px, 2.2vw, 30px) 28px; }
+
+.villas-section .villa-content h2 { margin-bottom: 4px; }
+.villas-section .villa-tagline { margin-bottom: 18px; font-size: 1.05rem; }
+
+/* Quick facts: one tidy strip, three equal columns, icon above label. */
+.villas-section .villa-facts {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    width: 100%;
+    gap: 0;
+    margin: 0 0 18px;
+    overflow: hidden;
+    border: 1px solid rgba(201, 160, 106, .4);
+    border-radius: 14px;
+    background: var(--cream);
+}
+.villas-section .villa-facts li {
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    padding: 11px 6px 10px;
+    border-radius: 0;
+    background: transparent;
+    font-size: 12.5px;
+    line-height: 1.2;
+    white-space: normal;
+    text-align: center;
+}
+.villas-section .villa-facts li + li { border-left: 1px solid rgba(201, 160, 106, .3); }
+
+/* Keeps the row's height on cards that have no facts (invisible, not read aloud). */
+.villas-section .villa-facts--placeholder { visibility: hidden; }
+
+.villas-section .villa-price {
+    margin-bottom: 18px;
+    padding: 14px 0;
+    border-color: rgba(201, 160, 106, .35);
+}
+.villas-section .villa-price strong { font-family: var(--cv-serif); font-size: 30px; font-weight: 600; line-height: 1; }
+
+.villas-section .villa-features { max-width: none; margin-bottom: 26px; }
+.villas-section .villa-features li { margin-bottom: 8px; font-size: 14px; }
+
+/* Buttons: full width, one clear main action and one quieter one. */
+.villas-section .villa-actions { flex-direction: column; flex-wrap: nowrap; width: 100%; gap: 10px; }
+.villas-section .villa-actions .villa-button { width: 100%; }
+.villas-section .villa-button--ghost {
+    background: transparent;
+    color: var(--cv-forest, #06211b);
+    border-color: rgba(185, 139, 85, .75);
+    padding-left: 26px;
+}
+.villas-section .villa-button--ghost:hover {
+    background: var(--cv-forest, #06211b);
+    color: #f1dcb9;
+    border-color: var(--cv-forest, #06211b);
+}
+
+/* Photo button: a clear hover and keyboard focus. */
+.villas-section .villa-photo-open { cursor: zoom-in; }
+.villas-section .villa-photo-count { padding: 7px 13px; font-size: 12px; }
+
+@media (prefers-reduced-motion: reduce) {
+    .villas-section .villa-card,
+    .villas-section .villa-image { transition: none; }
+    .villas-section .villa-card:hover { transform: none; }
 }

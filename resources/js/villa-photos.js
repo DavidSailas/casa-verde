@@ -1,4 +1,4 @@
-// Villas page: click a villa photo to open its photo gallery (sliding cards in a pop-up).
+// Villas page: click a villa photo to open its photo gallery (a full-screen viewer with thumbnails and booking buttons).
 
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-vm]').forEach(initGallery);
@@ -8,33 +8,51 @@ document.addEventListener('DOMContentLoaded', () => {
             const dialog = document.getElementById(button.dataset.vmOpen);
             if (!dialog || dialog.open) return;
             dialog.showModal();
+            dialog.dispatchEvent(new CustomEvent('vm:open'));
         });
     });
 });
 
 function initGallery(dialog) {
     const slides = [...dialog.querySelectorAll('.vm-slide')];
+    const thumbs = [...dialog.querySelectorAll('[data-vm-go]')];
+    const strip = dialog.querySelector('.vm-thumbs');
     const counter = dialog.querySelector('[data-vm-count]');
     const stage = dialog.querySelector('.vm-stage');
     const count = slides.length;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     let active = 0;
 
-    const offsetOf = (index) => {
-        let d = (index - active) % count;
-        if (d > count / 2) d -= count;
-        if (d < -count / 2) d += count;
-        return d;
+    // Photos next to the current one are fetched early so a click never shows an empty frame.
+    const preload = (index) => {
+        const img = slides[(index + count) % count]?.querySelector('img');
+        if (img) img.loading = 'eager';
     };
 
     const render = () => {
         slides.forEach((slide, index) => {
-            const d = offsetOf(index);
-            slide.dataset.pos = Math.abs(d) >= 3 ? (d > 0 ? '3' : '-3') : String(d);
-            slide.setAttribute('aria-hidden', d === 0 ? 'false' : 'true');
+            const on = index === active;
+            slide.classList.toggle('is-active', on);
+            slide.setAttribute('aria-hidden', on ? 'false' : 'true');
+        });
+
+        thumbs.forEach((thumb, index) => {
+            if (index === active) thumb.setAttribute('aria-current', 'true');
+            else thumb.removeAttribute('aria-current');
         });
 
         if (counter) counter.textContent = `${active + 1} / ${count}`;
+
+        // Keep the chosen thumbnail in the middle of the strip.
+        const current = thumbs[active];
+        if (strip && current) {
+            const left = current.offsetLeft - (strip.clientWidth - current.clientWidth) / 2;
+            strip.scrollTo({ left, behavior: reduceMotion || !dialog.open ? 'auto' : 'smooth' });
+        }
+
+        preload(active + 1);
+        preload(active - 1);
     };
 
     const go = (index) => {
@@ -45,22 +63,21 @@ function initGallery(dialog) {
     dialog.querySelector('[data-vm-prev]')?.addEventListener('click', () => go(active - 1));
     dialog.querySelector('[data-vm-next]')?.addEventListener('click', () => go(active + 1));
     dialog.querySelector('[data-vm-close]')?.addEventListener('click', () => dialog.close());
+    thumbs.forEach((thumb, index) => thumb.addEventListener('click', () => go(index)));
 
-    // A photo beside the middle one slides into the middle when clicked.
-    slides.forEach((slide, index) => slide.addEventListener('click', () => {
-        if (offsetOf(index) !== 0) go(index);
-    }));
-
-    // Clicking the dark area around the photos closes the gallery.
+    // Clicking the dark area around the photo closes the gallery.
     dialog.addEventListener('click', (event) => {
-        if (event.target === dialog || event.target.classList.contains('vm-inner') || event.target === stage) {
+        const t = event.target;
+        if (t === dialog || t.classList.contains('vm-shell') || t === stage || t.classList.contains('vm-frame')) {
             dialog.close();
         }
     });
 
     dialog.addEventListener('keydown', (event) => {
-        if (event.key === 'ArrowLeft') go(active - 1);
-        if (event.key === 'ArrowRight') go(active + 1);
+        if (event.key === 'ArrowLeft') { go(active - 1); event.preventDefault(); }
+        if (event.key === 'ArrowRight') { go(active + 1); event.preventDefault(); }
+        if (event.key === 'Home') { go(0); event.preventDefault(); }
+        if (event.key === 'End') { go(count - 1); event.preventDefault(); }
     });
 
     // Swipe on touch screens.
@@ -75,12 +92,9 @@ function initGallery(dialog) {
     });
     stage.addEventListener('pointercancel', () => { startX = null; });
 
-    // The page behind stays still while the gallery is open; it always starts on the first photo.
-    // Native modal dialogs already prevent interaction with the page behind them.
-    // Avoid changing <html> overflow: it can alter viewport width and break the header.
-    dialog.addEventListener('close', () => {
-        go(0);
-    });
+    // Always opens on the first photo.
+    dialog.addEventListener('close', () => go(0));
+    dialog.addEventListener('vm:open', render);
 
     render();
 }

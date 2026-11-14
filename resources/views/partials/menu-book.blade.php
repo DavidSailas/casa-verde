@@ -16,6 +16,12 @@
     // chunk(2, false) renumbers every sheet from 0 (the default keeps the faces' own numbers, so a later sheet would have no [0]).
     $sheets = $faces->chunk(2, false)->values();
     $pageCount = $faces->count() - 1;
+
+    // "Jump to" strip: the first page of every category (face number = page number).
+    $sections = $faces->map(fn (array $face, int $i): array => ['face' => $i, 'heading' => trim((string) ($face['heading'] ?? ''))])
+        ->filter(fn (array $item): bool => $item['face'] > 0 && $item['heading'] !== '')
+        ->unique('heading')
+        ->values();
     // With an odd number of faces the last sheet has a blank back, so it is never turned.
     $turns = $faces->count() % 2 === 0 ? $sheets->count() : $sheets->count() - 1;
 @endphp
@@ -67,6 +73,15 @@
             <button type="button" class="mb-arrow" data-mb-next aria-label="Next page"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
         </div>
     </div>
+
+    {{-- Jump to a section: shown while the book is open --}}
+    @if($sections->count() > 1)
+        <nav class="mb-contents" data-mb-contents aria-label="Menu sections">
+            @foreach($sections as $section)
+                <button type="button" class="mb-jump" data-mb-jump="{{ $section['face'] }}">{{ $section['heading'] }}</button>
+            @endforeach
+        </nav>
+    @endif
 
     {{-- Phones: after the cover opens, the pages are read by scrolling --}}
     <div class="mb-scroll" data-mb-scroll hidden>
