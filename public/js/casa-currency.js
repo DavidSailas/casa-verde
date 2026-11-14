@@ -32,6 +32,8 @@
     busy=true;
     document.querySelectorAll(candidates).forEach(el=>{
       if (el.closest('header') || el.closest('.cv-currency-control')) return;
+      // The translator must not touch prices: it swaps the text nodes this script updates and prices came out wrong.
+      if (!el.hasAttribute('translate')) { el.setAttribute('translate','no'); el.classList.add('notranslate'); }
       // Preserve the original PHP amount; dynamic booking totals update their text separately.
       const textNodes=[...el.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE);
       for (const node of textNodes) {

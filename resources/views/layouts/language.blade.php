@@ -47,11 +47,12 @@
     <div id="google_translate_element" aria-hidden="true"></div>
 
     <style>
-        .cv-lang { position: relative; flex: none; margin-right: 8px; font-family: Arial, Helvetica, sans-serif; }
+        /* Breathing room on both sides: the button no longer touches the menu or the Book button */
+        .cv-lang { position: relative; flex: none; margin: 0 clamp(14px, 1.5vw, 26px) 0 clamp(6px, .8vw, 14px); font-family: Arial, Helvetica, sans-serif; }
         .cv-lang__btn {
-            display: inline-flex; align-items: center; gap: 5px; height: 34px; padding: 0 9px;
-            border: 1px solid rgba(207, 161, 93, .5); border-radius: 30px; background: transparent;
-            color: #cfa15d; font: 600 11px Arial, Helvetica, sans-serif; letter-spacing: .03em; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px;
+            border: 1px solid rgba(207, 161, 93, .55); border-radius: 30px; background: rgba(207, 161, 93, .08);
+            color: #cfa15d; font: 600 12px Arial, Helvetica, sans-serif; letter-spacing: .08em; cursor: pointer; white-space: nowrap;
             transition: background .2s, color .2s, border-color .2s;
         }
         .cv-lang__btn:hover, .cv-lang__btn[aria-expanded="true"] { background: rgba(207, 161, 93, .14); color: #fff; border-color: #cfa15d; }
@@ -60,7 +61,7 @@
         .cv-lang__btn[aria-expanded="true"] .cv-lang__chev { transform: rotate(180deg); }
 
         .cv-lang__menu {
-            position: absolute; top: calc(100% + 10px); right: 0; z-index: 400;
+            position: absolute; top: calc(100% + 14px); right: 0; z-index: 400;
             width: 240px; max-height: min(70vh, 460px); overflow-y: auto; margin: 0; padding: 6px; list-style: none;
             border: 1px solid rgba(207, 161, 93, .45); border-radius: 14px; background: rgba(6, 33, 27, .98);
             box-shadow: 0 22px 44px -18px rgba(0, 0, 0, .7); scrollbar-width: thin;
@@ -75,6 +76,9 @@
         .cv-lang__opt:hover, .cv-lang__opt:focus-visible { background: rgba(207, 161, 93, .18); outline: 0; }
         .cv-lang__opt[aria-selected="true"] { background: rgba(207, 161, 93, .26); color: #fff; }
         .cv-lang__opt--auto { border-bottom: 1px solid rgba(207, 161, 93, .25); border-radius: 9px 9px 0 0; margin-bottom: 4px; }
+
+        .cv-lang__opt[aria-selected="true"]::after { content: "\2713"; color: #cfa15d; font-size: 14px; margin-left: 8px; }
+        .cv-lang__btn:focus-visible { outline: 2px solid #cfa15d; outline-offset: 3px; }
 
         /* Phones and tablets: the menu sits beside the hamburger button */
         @media (max-width: 1180px) {
@@ -164,6 +168,15 @@
                 // name can disagree (the old language wins), so clear every copy before setting the new one.
                 drop('googtrans');
                 document.cookie = 'googtrans=/en/' + target + '; path=/; max-age=' + 180 * 86400 + '; SameSite=Lax' + secure;
+
+                // Google's translator wraps text in <font> tags. A script that later removes or inserts around the
+                // old text node then throws ("not a child of this node") and stops working. Ignore those stale calls.
+                if (window.Node && Node.prototype && !Node.prototype.__cvSafe) {
+                    var rmChild = Node.prototype.removeChild, insBefore = Node.prototype.insertBefore;
+                    Node.prototype.removeChild = function (child) { if (child && child.parentNode !== this) return child; return rmChild.apply(this, arguments); };
+                    Node.prototype.insertBefore = function (node, ref) { if (ref && ref.parentNode !== this) return node; return insBefore.apply(this, arguments); };
+                    Node.prototype.__cvSafe = true;
+                }
 
                 window.googleTranslateElementInit = function () {
                     new google.translate.TranslateElement({

@@ -197,7 +197,7 @@
     window.addEventListener('pageshow', function () { bar.classList.remove('is-leaving'); });
 })();
 </script>
-<div id="cv-currency-control" class="cv-currency-control" aria-label="Display currency">
+<div id="cv-currency-control" class="cv-currency-control notranslate" translate="no" aria-label="Display currency">
   <label for="cv-currency-select">Currency</label>
   <select id="cv-currency-select" aria-label="Choose display currency">
     @foreach(['PHP','USD','EUR','GBP','AUD','CAD','JPY','SGD','KRW','CNY','HKD','AED','INR','NZD'] as $code)
@@ -210,4 +210,4 @@
 .cv-currency-control select{background:transparent;color:inherit;border:0;font:600 13px system-ui,sans-serif;cursor:pointer;max-width:85px}
 @media(max-width:600px){.cv-currency-control{bottom:10px;right:10px;padding:7px 9px}}
 </style>
-<script defer src="{{ asset('js/casa-currency.js') }}?v=1" data-rates-url="{{ route('currency.rates') }}"></script>
+<script defer src="{{ asset('js/casa-currency.js') }}?v=2" data-rates-url="{{ route('currency.rates') }}"></script>

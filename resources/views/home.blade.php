@@ -340,76 +340,12 @@ $contactFooter = $contents
 
             <div class="villa-card">
 
-                @php
-                    $photos = $villaPhotos[$villaSlug] ?? [];
-                @endphp
-
-                @if(count($photos) > 1)
-
-                    {{-- The only clickable pictures on the Home page: the card looks the same, and clicking the photo opens the Villas page gallery --}}
-                    <button
-                        type="button"
-                        class="villa-photo-open home-villa-photo"
-                        data-vm-open="vm-home-{{ $loop->index }}"
-                        aria-haspopup="dialog"
-                        aria-label="View all {{ count($photos) }} photos of {{ $villa->title }}"
-                    >
-                        <img
-                            src="{{ asset($homeVillaImage?->image ?: $villa->image) }}"
-                            alt="{{ $villa->title }}"
-                            class="villa-image"
-                        >
-                    </button>
-
-                    <dialog class="vm" id="vm-home-{{ $loop->index }}" data-vm aria-label="{{ $villa->title }} photos">
-                        <div class="vm-inner">
-
-                            <p class="vm-title">{{ $villa->title }}</p>
-
-                            <button type="button" class="vm-close" data-vm-close aria-label="Close photos">
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
-                            </button>
-
-                            <div class="vm-stage" tabindex="0" aria-roledescription="carousel">
-                                @foreach($photos as $photo)
-                                    <figure
-                                        class="vm-slide"
-                                        data-pos="{{ $loop->first ? '0' : ($loop->iteration === 2 ? '1' : ($loop->last ? '-1' : '2')) }}"
-                                        role="group"
-                                        aria-roledescription="slide"
-                                        aria-label="{{ $loop->iteration }} of {{ count($photos) }}"
-                                    >
-                                        <img
-                                            src="{{ asset($photo) }}"
-                                            alt="{{ $villa->title }}, photo {{ $loop->iteration }}"
-                                            loading="lazy"
-                                        >
-                                    </figure>
-                                @endforeach
-                            </div>
-
-                            <div class="vm-nav">
-                                <button type="button" data-vm-prev aria-label="Previous photo">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
-                                </button>
-                                <span class="vm-count" aria-live="polite" data-vm-count>1 / {{ count($photos) }}</span>
-                                <button type="button" data-vm-next aria-label="Next photo">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                                </button>
-                            </div>
-
-                        </div>
-                    </dialog>
-
-                @else
-
-                    <img
-                        src="{{ asset($homeVillaImage?->image ?: $villa->image) }}"
-                        alt="{{ $villa->title }}"
-                        class="villa-image"
-                    >
-
-                @endif
+                {{-- Home page: the villa picture is a plain, non-clickable image. The photo gallery opens only on the Villas page. --}}
+                <img
+                    src="{{ asset($homeVillaImage?->image ?: $villa->image) }}"
+                    alt="{{ $villa->title }}"
+                    class="villa-image"
+                >
 
                 <div class="villa-content">
 
