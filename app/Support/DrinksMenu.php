@@ -33,7 +33,7 @@ class DrinksMenu
      * Categories without a visible drink are left out, and so are filters that no drink uses.
      *
      * @param  Collection<string, Collection<int, HomeContent>>  $contents  active rows grouped by section
-     * @return array{title: string, brand: string, currency: string, note: string, filters: array<int, string>, categories: array<int, array<string, mixed>>, total: int}
+     * @return array{title: string, brand: string, logo: string, currency: string, note: string, filters: array<int, string>, categories: array<int, array<string, mixed>>, total: int}
      */
     public static function data(Collection $contents): array
     {
@@ -104,6 +104,7 @@ class DrinksMenu
         return [
             'title' => static::text($settings?->title, 'Drinks Menu'),
             'brand' => static::text($settings?->subtitle, 'Casa Verde Cliff Resort & Spa'),
+            'logo' => trim((string) $settings?->icon),
             'currency' => static::text($settings?->button_text, 'PHP'),
             'note' => static::text($settings?->description, ''),
             'filters' => $filters,

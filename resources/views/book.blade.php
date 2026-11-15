@@ -17,6 +17,158 @@
         'resources/js/app.js',
         'resources/js/book.js',
     ])
+
+    <style>
+        /* Booking form: refined styling. Layout, fields and text are unchanged.
+           The terms are no longer a scrolling box: a tap on "Read the full terms" opens them in full.
+           Inline so it shows without a rebuild; can be moved into resources/css/book.css. */
+        .bk {
+            --bk-forest: #0a2f26;
+            --bk-gold: #a47a44;
+            --bk-gold-bright: #cfa66d;
+            --bk-line: #e6dcc9;
+            --bk-field: #d9cfba;
+            --bk-shadow: 0 22px 36px -28px rgba(6, 33, 27, .55);
+        }
+
+        /* ---------- Intro steps ---------- */
+        .bk-steps li { padding: 8px 16px 8px 8px; border: 1px solid var(--bk-line); border-radius: 999px; background: rgba(255, 255, 255, .7); }
+        .bk-steps b { background: var(--bk-forest); color: #e6c28f; }
+
+        /* ---------- Reserve button ---------- */
+        .bk-reserve { border-radius: 12px; font-size: .88rem; letter-spacing: .12em; padding: 17px 22px; }
+
+        /* ---------- Form panel ---------- */
+        .bk .bk-panel {
+            border-top: 0; border-left: 0;
+            background: linear-gradient(180deg, #f6f0e4, #f2ebdc);
+            position: relative;
+        }
+        .bk .bk-panel::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: linear-gradient(90deg, var(--bk-gold-bright), rgba(207, 166, 109, .15)); }
+        .bk .bk-form { padding: clamp(20px, 3.6vw, 44px); }
+        .bk .bk-cols { gap: clamp(22px, 3.4vw, 40px); }
+
+        /* Fields card */
+        .bk .bk-fields {
+            gap: 0; padding: clamp(22px, 3vw, 36px);
+            border: 1px solid var(--bk-line); border-radius: 22px;
+            background: #fffdf9; box-shadow: var(--bk-shadow);
+        }
+        .bk .bk-group { gap: 16px; padding: 0 0 clamp(22px, 3vw, 32px); }
+        .bk .bk-group + .bk-group { padding-top: clamp(22px, 3vw, 32px); border-top: 1px solid var(--bk-line); }
+        .bk .bk-group:last-child { padding-bottom: 0; }
+        .bk .bk-group legend { gap: 12px; margin-bottom: 18px; font-size: 1.6rem; font-weight: 600; letter-spacing: 0; }
+        .bk .bk-group legend b { width: 30px; height: 30px; background: var(--bk-forest); color: #e6c28f; font-size: .85rem; font-weight: 500; box-shadow: 0 0 0 4px rgba(207, 166, 109, .22); }
+
+        /* Labels and inputs */
+        .bk .bk-field { gap: 8px; }
+        .bk .bk-field > span { font-size: .8rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #3a4a44; }
+        .bk .bk-field small { font-size: .72rem; font-weight: 400; letter-spacing: .02em; text-transform: none; color: #7a857f; }
+        .bk .bk-form :is(input[type="text"], input[type="email"], input[type="tel"], input[type="date"], input[type="number"], textarea) {
+            min-height: 54px; padding: 13px 16px;
+            border: 1.5px solid var(--bk-field); border-radius: 12px;
+            background: #fff; font-size: 1.02rem; color: var(--bk-ink);
+            color-scheme: light;
+        }
+        .bk .bk-form textarea { min-height: 112px; line-height: 1.55; }
+        .bk .bk-form :is(input[type="text"], input[type="email"], input[type="tel"], input[type="date"], textarea):hover { border-color: #c4b79c; }
+        .bk .bk-form :is(input, textarea):focus { border-color: var(--bk-gold-bright); box-shadow: 0 0 0 4px rgba(207, 166, 109, .28); }
+        .bk .bk-form input::placeholder, .bk .bk-form textarea::placeholder { color: #a2a8a3; }
+        .bk .bk-form input[type="date"]::-webkit-calendar-picker-indicator { padding: 6px; border-radius: 8px; cursor: pointer; opacity: .7; }
+        .bk .bk-form input[type="date"]::-webkit-calendar-picker-indicator:hover { background: #f3ead8; opacity: 1; }
+        .bk .bk-hint { padding: 10px 14px; border-radius: 10px; background: #f6efe0; font-size: .9rem; color: #5d5a4c; }
+
+        /* Guest stepper */
+        .bk .bk-stepper { grid-template-columns: 54px 1fr 54px; border: 1.5px solid var(--bk-field); border-radius: 12px; background: #fff; transition: border-color .2s, box-shadow .2s; }
+        .bk .bk-stepper:focus-within { border-color: var(--bk-gold-bright); box-shadow: 0 0 0 4px rgba(207, 166, 109, .28); }
+        .bk .bk-stepper button { background: #f6efe0; font-size: 1.5rem; color: var(--bk-forest); }
+        .bk .bk-stepper button:hover:not(:disabled) { background: var(--bk-forest); color: #e6c28f; }
+        .bk .bk-stepper button:focus-visible { outline: 2px solid var(--bk-gold); outline-offset: -3px; }
+        .bk .bk-form .bk-stepper input[type="number"] { min-height: 52px; font-size: 1.15rem; border: 0; }
+
+        /* ---------- Side column ---------- */
+        .bk .bk-side { gap: 18px; }
+        .bk .bk-side h3 { font-size: 1.5rem; }
+
+        .bk .bk-quote {
+            position: relative; padding: 26px 24px 22px; overflow: hidden;
+            border: 1px solid var(--bk-line); border-radius: 22px; background: #fff; box-shadow: var(--bk-shadow);
+        }
+        .bk .bk-quote::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: linear-gradient(90deg, var(--bk-gold-bright), #e8c797); }
+        .bk .bk-quote-empty { padding: 14px 16px; border-radius: 12px; background: #f9f4e8; font-size: .96rem; line-height: 1.55; color: #5d5a4c; }
+        .bk .bk-quote dl { gap: 12px; }
+        .bk .bk-quote dl > div { font-size: 1rem; }
+        .bk .bk-quote .is-total { margin-top: 6px; padding-top: 16px; }
+        .bk .bk-quote .is-total dd { font-size: 1.9rem; }
+        .bk .bk-quote-foot { margin-top: 16px; padding-top: 14px; border-top: 1px dashed #d8cdb6; font-size: .86rem; }
+
+        /* Terms: full text on demand, no scrolling box */
+        .bk .bk-terms { padding: 22px 22px 20px; border: 1px solid #e6d3a6; border-radius: 22px; background: linear-gradient(180deg, #fdf7e8, #faf1da); }
+        .bk .bk-terms h3 { margin-bottom: 14px; font-family: var(--cv-serif, serif); font-size: 1.5rem; color: var(--bk-forest); }
+        .bk .bk-terms h3 svg { flex: none; box-sizing: content-box; width: 17px; height: 17px; padding: 8px; border-radius: 50%; background: var(--bk-forest); color: #e6c28f; }
+        .bk .bk-terms-more { border: 1px solid #e3cf9d; border-radius: 14px; background: rgba(255, 255, 255, .6); }
+        .bk .bk-terms-more summary {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            min-height: 48px; padding: 0 16px; list-style: none; cursor: pointer;
+            font-size: .8rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--bk-forest);
+            border-radius: 14px; transition: background-color .2s;
+        }
+        .bk .bk-terms-more summary::-webkit-details-marker { display: none; }
+        .bk .bk-terms-more summary:hover { background: rgba(255, 255, 255, .85); }
+        .bk .bk-terms-more summary:focus-visible { outline: 2px solid var(--bk-gold); outline-offset: 2px; }
+        .bk .bk-terms-more summary::after { content: ""; flex: none; width: 9px; height: 9px; border-right: 2px solid var(--bk-gold); border-bottom: 2px solid var(--bk-gold); transform: translateY(-2px) rotate(45deg); transition: transform .25s; }
+        .bk .bk-terms-more[open] summary::after { transform: translateY(2px) rotate(225deg); }
+        .bk .bk-terms-more .t-close, .bk .bk-terms-more[open] .t-open { display: none; }
+        .bk .bk-terms-more[open] .t-close { display: inline; }
+        .bk .bk-terms-text { max-height: none; overflow: visible; padding: 4px 18px 18px; font-size: .92rem; line-height: 1.8; color: #50493c; border-top: 1px solid #ecdcb4; margin-top: 2px; padding-top: 16px; }
+
+        .bk .bk-check { gap: 13px; margin-top: 18px; font-size: 1rem; line-height: 1.4; }
+        .bk .bk-check input {
+            -webkit-appearance: none; appearance: none;
+            display: grid; place-content: center; flex: none;
+            width: 26px; height: 26px; margin: 0;
+            border: 1.5px solid var(--bk-gold); border-radius: 8px; background: #fff; cursor: pointer;
+            transition: background-color .2s, border-color .2s, box-shadow .2s;
+        }
+        .bk .bk-check input::after {
+            content: ""; width: 14px; height: 14px; transform: scale(0); transition: transform .15s ease;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e6c28f' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E") center / contain no-repeat;
+        }
+        .bk .bk-check input:checked { border-color: var(--bk-forest); background: var(--bk-forest); }
+        .bk .bk-check input:checked::after { transform: scale(1); }
+        .bk .bk-check input:focus-visible { outline: 3px solid rgba(207, 166, 109, .6); outline-offset: 2px; }
+        .bk .bk-check input.is-invalid { border-color: var(--bk-danger); box-shadow: 0 0 0 4px rgba(166, 61, 47, .15); outline: 0; }
+
+        /* Submit */
+        .bk .bk-submit {
+            min-height: 60px; border-radius: 14px;
+            background: linear-gradient(135deg, #e0b982, #c4955a); color: #1a1208;
+            font-size: .95rem; font-weight: 700; letter-spacing: .14em;
+            box-shadow: 0 18px 30px -16px rgba(122, 85, 40, .9);
+        }
+        .bk .bk-submit:hover:not(:disabled) { filter: none; background: linear-gradient(135deg, #e8c797, #cfa066); transform: translateY(-2px); box-shadow: 0 22px 32px -16px rgba(122, 85, 40, 1); }
+        .bk .bk-submit:focus-visible { outline: 3px solid var(--bk-forest); outline-offset: 3px; }
+        .bk .bk-submit.is-busy span::after { border-color: rgba(26, 18, 8, .3); border-top-color: #1a1208; }
+        .bk .bk-secure { display: flex; align-items: center; justify-content: center; gap: 8px; margin: -4px 0 0; font-size: .84rem; }
+        .bk .bk-secure::before {
+            content: ""; width: 14px; height: 14px; flex: none;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a47a44' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='11' width='16' height='10' rx='2'/%3E%3Cpath d='M8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E") center / contain no-repeat;
+        }
+
+        .bk .bk-alert { border-radius: 14px; }
+
+        /* Do not stick the side column while the terms are open (it would be taller than the screen) */
+        .bk .bk-side:has(.bk-terms-more[open]) { position: static; }
+
+        @media (max-width: 640px) {
+            .bk .bk-fields { padding: 20px 16px; border-radius: 18px; }
+            .bk .bk-group legend { font-size: 1.4rem; }
+            .bk .bk-steps li { font-size: .86rem; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .bk .bk-check input, .bk .bk-check input::after, .bk .bk-terms-more summary::after { transition: none; }
+        }
+    </style>
 </head>
 
 <body>
@@ -239,7 +391,10 @@
                                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>
                                     {{ $L[15] }}
                                 </h3>
-                                <div class="bk-terms-text" tabindex="0" role="region" aria-label="Terms and conditions for {{ $villa['title'] }}">{!! nl2br(e($villa['terms'])) !!}</div>
+                                <details class="bk-terms-more">
+                                    <summary><span class="t-open">Read the full terms</span><span class="t-close">Hide the terms</span></summary>
+                                    <div class="bk-terms-text" role="region" aria-label="Terms and conditions for {{ $villa['title'] }}">{!! nl2br(e($villa['terms'])) !!}</div>
+                                </details>
                                 <label class="bk-check">
                                     <input type="checkbox" name="terms" value="1" required @checked($mine && old('terms')) @class(['is-invalid' => $mine && $errors->has('terms')])>
                                     <span>{{ $L[14] }}</span>

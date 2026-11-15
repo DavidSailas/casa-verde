@@ -357,14 +357,15 @@ return [
         'dining_page_drinks_menu' => [
             'title' => 'Drinks menu: title and notes',
             'help' => 'The heading and notes of the drinks menu that opens when guests click the EXPLORE DRINKS MENU button. The menu is built from "Drinks menu: categories" and "Drinks menu: drinks" below, and it is only offered once at least one drink is shown on the live site.',
-            'fields' => ['title' => 'Menu title', 'subtitle' => 'Line under the title', 'button_text' => 'Currency', 'description' => 'Note at the bottom of the menu'],
+            'fields' => ['title' => 'Menu title', 'subtitle' => 'Line under the title', 'button_text' => 'Currency', 'description' => 'Note at the bottom of the menu', 'icon' => 'Logo in the menu header (image / symbol)'],
             'hints' => [
                 'title' => 'For example Drinks Menu.',
                 'subtitle' => 'Shown in small letters under the title, for example the name of the resort.',
                 'button_text' => 'Shown in front of every price, for example PHP.',
                 'description' => 'For example: Prices are in Philippine pesos (PHP). Please drink responsibly.',
+                'icon' => 'The logo at the top left of the drinks menu. Upload an image or type a symbol; clear it to use the default lotus.',
             ],
-            'hide' => ['image', 'icon', 'price', 'features', 'button_url'],
+            'hide' => ['image', 'price', 'features', 'button_url'],
         ],
         'dining_page_drinks_categories' => [
             'title' => 'Drinks menu: categories',

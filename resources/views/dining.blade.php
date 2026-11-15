@@ -275,6 +275,12 @@
             .dining-page *, .dining-page *::before, .dining-page *::after { transition: none !important; }
         }
     </style>
+
+    <style>
+        /* Food menu book: a dish added without a photo shows a neat plate placeholder instead of an empty circle */
+        .mbp .mbp-photo--empty { display: grid; place-items: center; border: 1px solid rgba(201, 160, 106, .5); background: radial-gradient(circle at 35% 30%, #fbf6ec, #efe4d0 78%); color: #c9a06a; }
+        .mbp .mbp-photo--empty svg { width: 46%; height: 46%; }
+    </style>
 </head>
 
 

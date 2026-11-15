@@ -40,7 +40,7 @@
         <header class="dm-bar" data-dm-bar>
             <div class="dm-bar-inner">
                 <div class="dm-brand">
-                    <x-icon name="lotus" :size="44" class="dm-logo" />
+                    <x-icon :name="filled($menu['logo'] ?? null) ? $menu['logo'] : 'lotus'" :size="44" class="dm-logo" />
                     <div>
                         <h2 class="dm-title" id="{{ $id }}-title">{{ $title }}</h2>
                         <p class="dm-sub">{{ $menu['brand'] }}</p>

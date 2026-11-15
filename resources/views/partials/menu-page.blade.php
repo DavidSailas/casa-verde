@@ -23,9 +23,11 @@
     <div class="mbp-dishes">
         @foreach($page['dishes'] as $dish)
             <article class="mbp-dish">
-                <div class="mbp-photo mbp-photo--{{ $dish['shape'] ?? 'round' }}">
+                <div class="mbp-photo mbp-photo--{{ $dish['shape'] ?? 'round' }}{{ $dish['image'] ? '' : ' mbp-photo--empty' }}">
                     @if($dish['image'])
                         <img src="{{ asset($dish['image']) }}" alt="{{ $dish['name'] }}" loading="lazy" decoding="async" draggable="false">
+                    @else
+                        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="24" cy="26" r="13"/><circle cx="24" cy="26" r="8.5"/><path d="M8 6v9a3 3 0 0 0 3 3v14M14 6v9a3 3 0 0 1-3 3M40 6c-3 2-4.5 6-4.5 10 0 3 1.5 4.5 4.5 4.5V32"/></svg>
                     @endif
                 </div>
                 <div class="mbp-text">

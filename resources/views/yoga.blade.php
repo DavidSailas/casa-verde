@@ -411,6 +411,86 @@
             main.yg #gallery .yg-slide img, main.yg #gallery .yg-slide::after { transition: none !important; }
         }
     </style>
+
+    <style>
+        /* Yoga gallery: controls bar under the photos (progress, counter, arrows). Nothing sits on top of the photos. */
+        main.yg #gallery .yg-controls { display: flex; align-items: center; gap: clamp(14px, 2.4vw, 28px); margin-top: 30px; }
+        main.yg #gallery .yg-controls .yg-progress { flex: 1; min-width: 0; height: 3px; margin: 0; }
+        main.yg #gallery .yg-controls .yg-count { margin: 0; min-width: 56px; font-size: .9rem; font-weight: 500; letter-spacing: .16em; white-space: nowrap; text-align: right; color: #e6c28f; }
+        main.yg #gallery .yg-controls__btns { display: flex; flex: none; gap: 12px; }
+        main.yg #gallery .yg-nav {
+            display: grid; place-items: center;
+            width: 54px; height: 54px; margin: 0; padding: 0 0 4px;
+            border: 1px solid rgba(220, 184, 135, .65); border-radius: 50%;
+            background: transparent; color: var(--yg-gold);
+            font-size: 1.9rem; line-height: 1; cursor: pointer;
+            transition: background-color .25s, color .25s, border-color .25s, opacity .25s, transform .25s;
+        }
+        main.yg #gallery .yg-nav:hover:not(:disabled) { background: linear-gradient(135deg, #e8c797, #cfa066); border-color: transparent; color: #06211b; transform: translateY(-2px); }
+        main.yg #gallery .yg-nav:disabled { opacity: .28; cursor: default; }
+        main.yg #gallery .yg-nav:focus-visible { outline: 3px solid #fbf1de; outline-offset: 3px; }
+
+        /* Slide number on each photo */
+        main.yg #gallery .yg-slider { counter-reset: ygs; }
+        main.yg #gallery .yg-slide { counter-increment: ygs; }
+        main.yg #gallery .yg-slide::before {
+            content: counter(ygs, decimal-leading-zero);
+            position: absolute; top: 16px; left: 16px; z-index: 2;
+            padding: 6px 13px; border: 1px solid rgba(220, 184, 135, .45); border-radius: 999px;
+            background: rgba(6, 33, 27, .78);
+            font: 500 .72rem var(--cv-sans, sans-serif); letter-spacing: .16em; color: #e6c28f;
+            pointer-events: none;
+        }
+
+        /* Soft fade where the next photos peek in, so the cut-off looks intentional */
+        @media (min-width: 900px) {
+            main.yg #gallery .yg-slider {
+                -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 56px, #000 calc(100% - 110px), transparent 100%);
+                        mask-image: linear-gradient(90deg, transparent 0, #000 56px, #000 calc(100% - 110px), transparent 100%);
+            }
+        }
+        @media (max-width: 640px) {
+            main.yg #gallery .yg-nav { width: 48px; height: 48px; font-size: 1.6rem; }
+            main.yg #gallery .yg-controls { gap: 12px; margin-top: 24px; }
+            main.yg #gallery .yg-controls .yg-count { min-width: 0; font-size: .8rem; }
+        }
+        @media (prefers-reduced-motion: reduce) { main.yg #gallery .yg-nav { transition: none; } }
+    </style>
+
+    <style>
+        /* Yoga Reset: safe against admin edits (long text, odd counts, missing photos) so the design holds when content changes */
+        main.yg :is(h1, h2, h3, p, li, summary, strong, span, small, figcaption, time, blockquote) { overflow-wrap: break-word; }
+        main.yg :is(.yg-split, .yg-classes, .yg-resort, .yg-teacher, .yg-faq, .yg-flow, .yg-package, .yg-cards, .yg-sessions, .yg-notice, .yg-spot) > * { min-width: 0; }
+
+        /* Any number of programme stats: 1 to 8 fit neatly in rows */
+        @media (min-width: 760px) {
+            main.yg .yg-numbers { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+        }
+
+        /* Resort photos: an odd photo at the end fills the row instead of leaving a gap */
+        main.yg .yg-collage figure:last-child:nth-child(even) { grid-column: 1 / -1; }
+        main.yg .yg-collage figure:last-child:nth-child(even) img { aspect-ratio: 16 / 10; }
+        main.yg .yg-collage:has(figure:only-child) figure { grid-column: 1 / -1; }
+
+        /* Long photo captions stay tidy */
+        main.yg #gallery .yg-slide figcaption {
+            display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden;
+        }
+
+        /* Photos of any size or shape are cropped to the same frame; a photo that fails to load shows a calm placeholder */
+        main.yg img { background: #e9dfcc; }
+        main.yg #gallery .yg-slide img { background: #0e3629; }
+
+        /* Two dark blocks next to each other (for example after reordering) stay visibly separate */
+        main.yg #gallery { border-top: 1px solid rgba(220, 184, 135, .25); border-bottom: 1px solid rgba(220, 184, 135, .25); }
+        main.yg .yg-dark { border-bottom: 1px solid rgba(220, 184, 135, .25); }
+
+        /* A very short or very long list never stretches the sticky teacher photo */
+        @media (min-width: 900px) { main.yg .yg-teacher { align-items: start; } }
+
+        /* Gallery with only a few photos: hide the controls bar when everything already fits */
+        main.yg #gallery .yg-controls:has(.yg-nav:first-child:disabled):has(.yg-nav:last-child:disabled) .yg-controls__btns { opacity: .35; }
+    </style>
 </head>
 <body>
     @include('layouts.header')
@@ -537,12 +617,40 @@
                 var wrap = slider.closest('section');
                 var count = wrap && wrap.querySelector('[data-yg-count]');
 
+                // Controls bar under the photos: progress line, counter and the two arrows
+                var prevBtn = wrap && wrap.querySelector('[data-yg-prev]');
+                var nextBtn = wrap && wrap.querySelector('[data-yg-next]');
+                var host = count ? count.parentNode : null;
+                if (prevBtn && nextBtn && host && !host.querySelector('.yg-controls')) {
+                    var controls = document.createElement('div');
+                    controls.className = 'yg-controls';
+                    var track = document.createElement('div');
+                    track.className = 'yg-progress';
+                    track.setAttribute('aria-hidden', 'true');
+                    track.innerHTML = '<span></span>';
+                    var buttons = document.createElement('div');
+                    buttons.className = 'yg-controls__btns';
+                    prevBtn.classList.add('yg-nav');
+                    nextBtn.classList.add('yg-nav');
+                    buttons.appendChild(prevBtn);
+                    buttons.appendChild(nextBtn);
+                    controls.appendChild(track);
+                    controls.appendChild(count);
+                    controls.appendChild(buttons);
+                    host.appendChild(controls);
+                    var oldBox = wrap.querySelector('.yg-gallery__head .yg-arrows');
+                    if (oldBox && !oldBox.children.length) { oldBox.remove(); }
+                }
+
                 if (count) {
-                    var bar = document.createElement('div');
-                    bar.className = 'yg-progress';
-                    bar.setAttribute('aria-hidden', 'true');
-                    bar.innerHTML = '<span></span>';
-                    count.parentNode.insertBefore(bar, count);
+                    var bar = wrap.querySelector('.yg-progress');
+                    if (!bar) {
+                        bar = document.createElement('div');
+                        bar.className = 'yg-progress';
+                        bar.setAttribute('aria-hidden', 'true');
+                        bar.innerHTML = '<span></span>';
+                        count.parentNode.insertBefore(bar, count);
+                    }
                     var fill = bar.firstChild;
                     var update = function () {
                         var max = slider.scrollWidth - slider.clientWidth;
