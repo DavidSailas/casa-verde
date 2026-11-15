@@ -216,6 +216,12 @@
                 'promo' => $promoOn ? $villa['promo'] : null,
                 'from' => $promoOn ? $villa['from']->toDateString() : null,
                 'to' => $promoOn ? $villa['to']->toDateString() : null,
+                'seasons' => collect($villa['seasons'])->map(fn ($s) => [
+                    'from' => $s['from']->toDateString(),
+                    'to' => $s['to']->toDateString(),
+                    'price' => $s['price'],
+                ])->values()->all(),
+                'unavailable' => \App\Support\Availability::unavailableDates($slug),
                 'maxNights' => $maxNights,
             ];
         @endphp

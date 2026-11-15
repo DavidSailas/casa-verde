@@ -896,10 +896,10 @@ return [
         ],
         'journal_articles' => [
             'title' => 'Articles',
-            'help' => 'One entry per article, in the order shown on the Journal page (use the position number to move one up or down; newest first is usual). Each article gets its own page. Switch an entry off to hide it without deleting it. Add more photos to an article under "Journal: article photos".',
+            'help' => 'One entry per article, in the order shown on the Journal page (drag the handle on the left to move one up or down; newest first is usual). Each article gets its own page. A new article starts as a draft: use Preview to see it as visitors will, then switch it to Published. Add more photos to an article under "Journal: article photos".',
             'fields' => ['title' => 'Article title', 'subtitle' => 'Date (for example August 06, 2026)', 'image' => 'Main photo', 'button_text' => 'Short text on the Journal page (optional)', 'description' => 'Article text'],
             'hints' => [
-                'description' => 'Write the whole article here. Leave an empty line between paragraphs. Formatting: start a line with ## for a heading ### for a smaller heading or #### for an even smaller one (for example: ## Getting there); start lines with - for a bullet list; put **two stars** around words to make them bold.',
+                'description' => 'Write the whole article here and use the buttons above the box for headings, bold and bullet lists (Ctrl+B also makes the selected words bold). Leave an empty line between paragraphs. The Preview tab shows how the text will look on the site.',
                 'image' => 'A landscape photo (about 1600 x 1000 px). It is the picture on the article card and at the top of the article.',
                 'button_text' => 'The couple of lines shown on the card. Leave empty to use the first lines of the article text.',
             ],

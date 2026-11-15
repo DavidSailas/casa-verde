@@ -109,6 +109,8 @@ function initSteppers(form) {
 // The total shown here is a preview. The server works out the real price when the request is sent.
 function initQuote(form) {
     const rates = JSON.parse(form.dataset.rates);
+    const taken = new Set(rates.unavailable || []);
+    const seasons = rates.seasons || []; // weakest first, the last match wins (same order as the server)
     const inEl = form.querySelector('[data-bk-in]');
     const outEl = form.querySelector('[data-bk-out]');
     const hint = form.querySelector('[data-bk-nights-hint]');
@@ -127,6 +129,7 @@ function initQuote(form) {
 
         const out = parse(outEl.value);
         if (!a || !out) {
+            form.dataset.unavailable = 'false';
             q('[data-bk-lines]').hidden = true;
             q('[data-bk-empty]').hidden = false;
             hint.textContent = 'Select your dates to see the price.';
@@ -134,14 +137,28 @@ function initQuote(form) {
             return;
         }
 
-        let nights = 0, total = 0, regular = 0, promoNights = 0;
+        let nights = 0, total = 0, regular = 0, promoNights = 0, firstTaken = null;
         for (const d = new Date(a); d < out; d.setDate(d.getDate() + 1)) {
             nights++;
             const day = iso(d);
+            if (!firstTaken && taken.has(day)) firstTaken = new Date(d);
             const onPromo = rates.promo && day >= rates.from && day <= rates.to;
-            total += onPromo ? rates.promo : rates.regular;
-            regular += rates.regular;
+            let base = rates.regular;
+            for (const s of seasons) if (day >= s.from && day <= s.to) base = s.price;
+            total += onPromo ? rates.promo : base;
+            regular += base;
             if (onPromo) promoNights++;
+        }
+
+        // A night that is closed or already booked: say so and keep the form from being sent.
+        form.dataset.unavailable = firstTaken ? 'true' : 'false';
+        if (firstTaken) {
+            const when = firstTaken.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
+            hint.textContent = `Sorry, this villa is not available on ${when}. Please choose other dates.`;
+            hint.style.color = '#a63d2f';
+            q('[data-bk-lines]').hidden = true;
+            q('[data-bk-empty]').hidden = false;
+            return;
         }
 
         if (nights > rates.maxNights) {
@@ -172,6 +189,12 @@ function initSubmit(form) {
     const submit = form.querySelector('[data-bk-submit]');
 
     form.addEventListener('submit', (e) => {
+        if (form.dataset.unavailable === 'true') {
+            e.preventDefault();
+            form.querySelector('[data-bk-in]')?.focus();
+            return;
+        }
+
         // Browser checks give friendly messages; novalidate lets us mark every bad field at once.
         let firstBad = null;
         form.querySelectorAll('input:not([type="hidden"]), textarea').forEach((el) => {

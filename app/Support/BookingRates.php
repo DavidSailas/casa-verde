@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\HomeContent;
+use App\Models\SeasonalRate;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 
@@ -29,6 +30,8 @@ class BookingRates
             ->map(fn ($t) => Str::slug((string) $t))->all();
 
         $num = fn ($v) => ($n = (float) preg_replace('/[^\d.]/', '', (string) $v)) > 0 ? $n : null;
+
+        $seasons = static::seasons();
 
         foreach ($rows->get('villas', collect()) as $villa) {
             $slug = Str::slug($villa->title);
@@ -65,6 +68,7 @@ class BookingRates
                 'promo' => $promo,
                 'from' => $from,
                 'to' => $to,
+                'seasons' => static::seasonsFor($seasons, $slug),
                 'terms' => $terms,
             ];
         }
@@ -72,14 +76,72 @@ class BookingRates
         return $out;
     }
 
-    /** Rate for one night. The promo applies to every night from its first to its last date, inclusive. */
+    /**
+     * Rate for one night. The promo wins on the nights it covers; otherwise a seasonal rate
+     * (Admin > Availability) applies; otherwise the regular rate. Dates are inclusive.
+     */
     public static function rate(array $villa, Carbon $night): float
     {
         if ($villa['promo'] && $night->gte($villa['from']) && $night->lte($villa['to'])) {
             return (float) $villa['promo'];
         }
 
-        return (float) $villa['regular'];
+        return static::baseRate($villa, $night);
+    }
+
+    /** The nightly price without the promo: the seasonal rate for that night if there is one, else the regular rate. */
+    public static function baseRate(array $villa, Carbon $night): float
+    {
+        $price = null;
+
+        // Ordered weakest to strongest (see seasonsFor), so the last match wins.
+        foreach ((array) ($villa['seasons'] ?? []) as $season) {
+            if ($night->gte($season['from']) && $night->lte($season['to'])) {
+                $price = (float) $season['price'];
+            }
+        }
+
+        return $price ?? (float) $villa['regular'];
+    }
+
+    /**
+     * All seasonal rates, as plain arrays.
+     *
+     * @return array<int, array{slug:?string,name:string,from:Carbon,to:Carbon,price:float}>
+     */
+    protected static function seasons(): array
+    {
+        try {
+            return SeasonalRate::orderBy('start_date')->orderBy('id')->get()
+                ->map(fn (SeasonalRate $r) => [
+                    'slug' => $r->villa_slug ?: null,
+                    'name' => (string) $r->name,
+                    'from' => $r->start_date->copy()->startOfDay(),
+                    'to' => $r->end_date->copy()->startOfDay(),
+                    'price' => (float) $r->price,
+                ])
+                ->all();
+        } catch (\Throwable) {
+            return []; // table not migrated yet
+        }
+    }
+
+    /**
+     * The seasonal rates that apply to one villa, weakest first: rates for every villa come before
+     * rates for this villa alone, and among those the one that starts later comes last (so the more
+     * specific, later season wins where two overlap).
+     *
+     * @param  array<int, array<string, mixed>>  $seasons
+     * @return array<int, array<string, mixed>>
+     */
+    protected static function seasonsFor(array $seasons, string $slug): array
+    {
+        $mine = array_values(array_filter($seasons, fn (array $s) => $s['slug'] === null || $s['slug'] === $slug));
+
+        usort($mine, fn (array $a, array $b) => [$a['slug'] === null ? 0 : 1, $a['from']->timestamp]
+            <=> [$b['slug'] === null ? 0 : 1, $b['from']->timestamp]);
+
+        return $mine;
     }
 
     /** @return array{nights:int,total:float,regular_total:float} */
@@ -92,7 +154,7 @@ class BookingRates
         for ($d = $checkIn->copy()->startOfDay(); $d->lt($checkOut->copy()->startOfDay()); $d->addDay()) {
             $nights++;
             $total += static::rate($villa, $d);
-            $regular += (float) $villa['regular'];
+            $regular += static::baseRate($villa, $d);
         }
 
         return ['nights' => $nights, 'total' => $total, 'regular_total' => $regular];

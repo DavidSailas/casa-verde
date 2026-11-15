@@ -42,6 +42,8 @@ export default defineConfig({
                 'resources/js/book.js',
                 'resources/css/widgets.css',
                 'resources/js/widgets.js',
+                'resources/js/admin-reorder.js',
+                'resources/js/admin-editor.js',
             ],
             refresh: true,
         }),

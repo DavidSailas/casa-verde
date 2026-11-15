@@ -76,9 +76,23 @@
                     <p class="-mt-1 mb-3 max-w-2xl text-sm text-ink-soft">{{ config('admin.sections.'.$block['name'].'.help') }}</p>
                 @endif
 
-                <ul role="list" class="divide-y divide-sand-200 overflow-hidden rounded-xl border border-sand-300 bg-white">
+                @php($isArticles = $block['name'] === 'journal_articles')
+
+                @if (count($block['items']) > 1)
+                    <p class="mb-2 text-sm text-ink-soft">Drag the handle on the left to change the order. With a keyboard, focus the handle and press the up or down arrow.</p>
+                @endif
+
+                <ul role="list" data-reorder-url="{{ route('admin.content.reorder') }}" data-csrf="{{ csrf_token() }}"
+                    class="divide-y divide-sand-200 overflow-hidden rounded-xl border border-sand-300 bg-white">
                     @foreach ($block['items'] as $item)
-                        <li class="flex flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3 sm:flex-nowrap">
+                        <li data-id="{{ $item->id }}" class="flex flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3 sm:flex-nowrap [&.is-dragging]:bg-sand-100 [&.is-dragging]:shadow-md">
+                            @if (count($block['items']) > 1)
+                                <button type="button" data-drag-handle
+                                        aria-label="Move {{ $item->display_title }}. Use the up and down arrow keys."
+                                        class="-ml-1 flex h-9 w-7 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-ink-soft hover:bg-sand-100 hover:text-forest-900 active:cursor-grabbing focus-visible:ring-4 focus-visible:ring-gold-400/40">
+                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><circle cx="7" cy="5" r="1.4"/><circle cx="13" cy="5" r="1.4"/><circle cx="7" cy="10" r="1.4"/><circle cx="13" cy="10" r="1.4"/><circle cx="7" cy="15" r="1.4"/><circle cx="13" cy="15" r="1.4"/></svg>
+                                </button>
+                            @endif
                             <a href="{{ route('admin.content.edit', $item) }}" class="shrink-0" tabindex="-1" aria-hidden="true">
                                 @if ($item->image)
                                     <img src="{{ asset($item->image) }}" alt="" loading="lazy"
@@ -98,12 +112,15 @@
                             </div>
 
                             <div class="flex w-full items-center justify-between gap-4 sm:w-auto sm:justify-end">
-                                <span class="inline-flex w-20 items-center gap-2 text-sm {{ $item->active ? 'text-forest-800' : 'text-ink-soft' }}">
+                                <span class="inline-flex w-24 items-center gap-2 text-sm {{ $item->active ? 'text-forest-800' : 'text-ink-soft' }}">
                                     <span class="h-2 w-2 rounded-full {{ $item->active ? 'bg-forest-700' : 'bg-sand-300' }}"></span>
-                                    {{ $item->active ? 'Visible' : 'Hidden' }}
+                                    {{ $isArticles ? ($item->active ? 'Published' : 'Draft') : ($item->active ? 'Visible' : 'Hidden') }}
                                 </span>
 
                                 <div class="flex items-center gap-1">
+                                    @if ($isArticles)
+                                        <a href="{{ route('admin.content.preview', $item) }}" target="_blank" rel="noopener" class="btn-secondary px-3 py-1.5">Preview</a>
+                                    @endif
                                     <a href="{{ route('admin.content.edit', $item) }}" class="btn-secondary px-3 py-1.5">Edit</a>
                                     <form action="{{ route('admin.content.destroy', $item) }}" method="POST"
                                           onsubmit="return confirm('Delete this entry? This cannot be undone.');">
@@ -125,5 +142,9 @@
             </div>
         @endforelse
     </div>
+
+    @push('scripts')
+        @vite('resources/js/admin-reorder.js')
+    @endpush
 
 @endsection

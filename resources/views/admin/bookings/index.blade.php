@@ -57,6 +57,9 @@
                                         {{ $booking->status === 'pending' ? 'bg-gold-300 text-forest-900' : ($booking->status === 'confirmed' ? 'bg-forest-100 text-forest-800' : 'bg-sand-200 text-ink-soft') }}">
                                         {{ ucfirst($booking->status) }}
                                     </span>
+                                    @if ($booking->status === 'pending' && \App\Support\Availability::conflict($booking->villa_slug, $booking->check_in, $booking->check_out, $booking->id) !== null)
+                                        <span class="rounded-full bg-danger-50 px-2 py-0.5 text-xs font-medium text-danger-700" title="These dates are already taken or closed. See Availability.">Dates not available</span>
+                                    @endif
                                 </div>
                                 <p class="mt-1 text-[0.9375rem] text-ink">
                                     {{ $booking->villa_title }} ·

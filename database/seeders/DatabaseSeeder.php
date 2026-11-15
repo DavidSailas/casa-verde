@@ -27,6 +27,8 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@casaverde.test',
             'password' => bcrypt('password'),
             'is_admin' => true,
+            'role' => 'owner',
+            'must_change_password' => true, // choose a real password at the first sign-in
         ]);
 
         // Create Casa Verde homepage content

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Mail\BookingStatusChanged;
 use App\Models\Booking;
+use App\Support\Availability;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -64,6 +65,17 @@ class BookingController extends Controller
     public function update(Request $request, Booking $booking): RedirectResponse
     {
         $data = $request->validate(['status' => ['required', 'in:'.implode(',', Booking::STATUSES)]]);
+
+        if ($data['status'] === 'confirmed' && $booking->status !== 'confirmed') {
+            $night = Availability::conflict($booking->villa_slug, $booking->check_in, $booking->check_out, $booking->id);
+
+            if ($night !== null) {
+                return back()->withErrors([
+                    'status' => "Booking {$booking->reference} was not confirmed: {$booking->villa_title} is already taken or closed on "
+                        .\Carbon\Carbon::parse($night)->format('j M Y').'. Cancel the other booking or remove the closed dates in Availability first.',
+                ]);
+            }
+        }
 
         $changed = $booking->status !== $data['status'];
         $booking->update(['status' => $data['status']]);

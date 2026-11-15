@@ -9,6 +9,7 @@
         $label = fn (string $field, string $default) => $meta['fields'][$field] ?? $default;
         $show = fn (string $field) => ! in_array($field, $meta['hide'] ?? [], true);
         $hint = fn (string $field) => $meta['hints'][$field] ?? null;
+        $isArticle = old('section', $item->section) === 'journal_articles';
     @endphp
 
     <a href="{{ route('admin.content.index', $item->section ? ['section' => $item->section] : []) }}"
@@ -90,7 +91,7 @@
                     @if ($show('description'))
                     <div>
                         <label for="description" class="field-label">{{ $label('description', 'Description') }}</label>
-                        <textarea id="description" name="description" rows="{{ $meta['rows']['description'] ?? 5 }}" class="field-input">{{ old('description', $item->description) }}</textarea>
+                        <textarea id="description" name="description" rows="{{ $isArticle ? 18 : ($meta['rows']['description'] ?? 5) }}" @if ($isArticle) data-article-editor @endif class="field-input">{{ old('description', $item->description) }}</textarea>
                         @if ($hint('description'))
                             <p class="field-hint">{{ $hint('description') }}</p>
                         @endif
@@ -430,8 +431,13 @@
                                {{ old('active', $item->active ?? true) ? 'checked' : '' }}>
                         <span class="relative mt-0.5 h-6 w-11 shrink-0 rounded-full bg-sand-300 transition-colors after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow-sm after:transition-transform peer-checked:bg-forest-700 peer-checked:after:translate-x-5 peer-focus-visible:ring-4 peer-focus-visible:ring-gold-400/40"></span>
                         <span>
-                            <span class="block text-sm font-medium text-forest-900">Show on the live site</span>
-                            <span class="block text-sm text-ink-soft">Turn off to hide this entry without deleting it.</span>
+                            @if ($isArticle)
+                                <span class="block text-sm font-medium text-forest-900">Published</span>
+                                <span class="block text-sm text-ink-soft">Off = draft. A draft is saved but visitors cannot see it. Use Preview to check it first.</span>
+                            @else
+                                <span class="block text-sm font-medium text-forest-900">Show on the live site</span>
+                                <span class="block text-sm text-ink-soft">Turn off to hide this entry without deleting it.</span>
+                            @endif
                         </span>
                     </label>
 
@@ -514,8 +520,20 @@
 
         <div class="sticky bottom-0 z-10 -mx-4 flex items-center gap-3 border-t border-sand-300 bg-sand-100/95 px-4 py-4 backdrop-blur sm:-mx-8 sm:px-8 lg:-mx-12 lg:col-span-2 lg:px-12">
             <button type="submit" class="btn-primary px-6">{{ $item->exists ? 'Save changes' : 'Create entry' }}</button>
+            @if ($isArticle && $item->exists)
+                <a href="{{ route('admin.content.preview', $item) }}" target="_blank" rel="noopener" class="btn-secondary">Preview</a>
+            @endif
             <a href="{{ route('admin.content.index', $item->section ? ['section' => $item->section] : []) }}" class="btn-secondary">Cancel</a>
+            @if ($isArticle && $item->exists)
+                <span class="hidden text-sm text-ink-soft sm:inline">Preview shows the last saved version.</span>
+            @endif
         </div>
     </form>
+
+    @if ($isArticle)
+        @push('scripts')
+            @vite('resources/js/admin-editor.js')
+        @endpush
+    @endif
 
 @endsection

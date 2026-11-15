@@ -9,7 +9,7 @@
     "isEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-CGHMZ2BQ.css",
+    "file": "assets/app-MwVNpVBk.css",
     "name": "app",
     "names": [
       "app.css"
@@ -242,6 +242,18 @@
     "src": "resources/css/yoga.css",
     "isEntry": true
   },
+  "resources/js/admin-editor.js": {
+    "file": "assets/admin-editor-CwrZxoT9.js",
+    "name": "admin-editor",
+    "src": "resources/js/admin-editor.js",
+    "isEntry": true
+  },
+  "resources/js/admin-reorder.js": {
+    "file": "assets/admin-reorder-CdFupzq3.js",
+    "name": "admin-reorder",
+    "src": "resources/js/admin-reorder.js",
+    "isEntry": true
+  },
   "resources/js/app.js": {
     "file": "assets/app-i4e_o9l4.js",
     "name": "app",
@@ -252,7 +264,7 @@
     ]
   },
   "resources/js/book.js": {
-    "file": "assets/book-CATuxBZv.js",
+    "file": "assets/book-Dn9DU-Ny.js",
     "name": "book",
     "src": "resources/js/book.js",
     "isEntry": true

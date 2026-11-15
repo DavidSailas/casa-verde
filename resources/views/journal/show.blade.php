@@ -22,6 +22,12 @@
     @include('layouts.header')
 
     <main class="cv-page jn jn--article">
+        @if(!empty($previewing))
+            <div role="status" style="margin:0 auto 1.5rem;max-width:60rem;padding:.75rem 1rem;border:1px solid #d8c68a;border-radius:.5rem;background:#fbf4dc;color:#3b3a2a;font:600 .9rem/1.4 Lato,sans-serif;display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:center;justify-content:space-between">
+                <span>Preview &mdash; {{ $previewing->active ? 'this article is published and visible to visitors.' : 'this article is a draft. Visitors cannot see it yet.' }}</span>
+                <a href="{{ route('admin.content.edit', $previewing) }}" style="color:#1f4d36;text-decoration:underline">&larr; Back to editing</a>
+            </div>
+        @endif
         <header class="jn-art-head">
             <a class="jn-back" href="{{ route('journal.index') }}">&larr; Back to Journal</a>
             <h1>{{ $article['title'] }}</h1>

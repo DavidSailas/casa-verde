@@ -36,6 +36,36 @@ class JournalController extends Controller
 
         abort_if($article === null, 404);
 
+        return $this->articlePage($contents, $site, $articles, $article);
+    }
+
+    /**
+     * An article as visitors will see it, shown to a signed-in admin even while it is a draft
+     * (Site content > Journal > Articles > Preview). Only reached through the admin routes.
+     */
+    public function preview(HomeContent $content): View
+    {
+        [$contents, $site] = $this->shared();
+
+        // Put this entry among the published ones, in its place, whether or not it is switched on.
+        $others = $contents->get('journal_articles', collect())->reject(fn (HomeContent $row): bool => $row->is($content));
+        $contents->put('journal_articles', $others->push($content)->sortBy([['sort_order', 'asc'], ['id', 'asc']])->values());
+
+        $articles = $this->articles($contents);
+        $article = $articles->firstWhere('id', $content->id);
+
+        abort_if($article === null, 404);
+
+        return $this->articlePage($contents, $site, $articles, $article, $content);
+    }
+
+    /**
+     * @param  Collection<string, Collection<int, HomeContent>>  $contents
+     * @param  Collection<int, array<string, mixed>>  $articles
+     * @param  array<string, mixed>  $article
+     */
+    protected function articlePage(Collection $contents, ?HomeContent $site, Collection $articles, array $article, ?HomeContent $previewing = null): View
+    {
         $header = $contents->get('journal_header', collect())->first();
 
         return view('journal.show', [
@@ -44,7 +74,8 @@ class JournalController extends Controller
             'contents' => $contents,
             'site' => $site,
             'article' => $article,
-            'more' => $articles->where('slug', '!=', $slug)->values(),
+            'more' => $articles->where('slug', '!=', $article['slug'])->values(),
+            'previewing' => $previewing,
         ]);
     }
 
@@ -78,6 +109,7 @@ class JournalController extends Controller
                 $short = trim((string) $row->button_text);
 
                 return [
+                    'id' => $row->id,
                     'slug' => $slug,
                     'title' => trim((string) $row->title),
                     'date' => trim((string) $row->subtitle),

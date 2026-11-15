@@ -17,6 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
+            'admin.area' => \App\Http\Middleware\EnsureAdminAccess::class,
+            'admin.log' => \App\Http\Middleware\LogAdminChanges::class,
         ]);
 
         // Guests hitting /admin are sent to the admin login (there is no plain "login" route).

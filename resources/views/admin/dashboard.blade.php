@@ -17,6 +17,80 @@
         </a>
     </div>
 
+    @if ($bookings !== null || $reviews !== null)
+        <div class="mt-10 grid gap-5 lg:grid-cols-2">
+
+            @if ($bookings !== null)
+                <section class="panel" aria-labelledby="bookings-today-heading">
+                    <div class="flex items-baseline justify-between gap-3">
+                        <h2 id="bookings-today-heading" class="section-title">Bookings today</h2>
+                        <a href="{{ route('admin.bookings.index') }}" class="text-sm font-medium text-forest-700 hover:text-forest-900 hover:underline">All bookings</a>
+                    </div>
+
+                    @if ($bookings['pending'] > 0)
+                        <p class="mt-2 text-sm text-gold-700">{{ $bookings['pending'] }} {{ Str::plural('request', $bookings['pending']) }} waiting for an answer.</p>
+                    @endif
+
+                    <h3 class="mt-5 text-sm font-medium text-forest-900">Requests received today</h3>
+                    @forelse ($bookings['received'] as $booking)
+                        <a href="{{ route('admin.bookings.index') }}" class="mt-2 flex items-center justify-between gap-3 rounded-lg border border-sand-200 px-3 py-2 transition-colors hover:bg-sand-50">
+                            <span class="min-w-0">
+                                <span class="block truncate font-medium text-forest-900">{{ $booking->name }}</span>
+                                <span class="block truncate text-sm text-ink-soft">{{ $booking->villa_title }} · {{ $booking->check_in->format('M j') }}–{{ $booking->check_out->format('M j') }}</span>
+                            </span>
+                            <span class="shrink-0 text-sm {{ $booking->status === 'pending' ? 'text-gold-700' : 'text-ink-soft' }}">{{ ucfirst($booking->status) }}</span>
+                        </a>
+                    @empty
+                        <p class="mt-2 text-sm text-ink-soft">No new requests today.</p>
+                    @endforelse
+
+                    <h3 class="mt-5 text-sm font-medium text-forest-900">Guests arriving today</h3>
+                    @forelse ($bookings['arriving'] as $booking)
+                        <div class="mt-2 flex items-center justify-between gap-3 rounded-lg border border-sand-200 px-3 py-2">
+                            <span class="min-w-0">
+                                <span class="block truncate font-medium text-forest-900">{{ $booking->name }}</span>
+                                <span class="block truncate text-sm text-ink-soft">{{ $booking->villa_title }} · {{ $booking->nights }} {{ Str::plural('night', $booking->nights) }}</span>
+                            </span>
+                            <span class="shrink-0 text-sm {{ $booking->status === 'confirmed' ? 'text-forest-800' : 'text-gold-700' }}">{{ ucfirst($booking->status) }}</span>
+                        </div>
+                    @empty
+                        <p class="mt-2 text-sm text-ink-soft">Nobody arrives today.</p>
+                    @endforelse
+                </section>
+            @endif
+
+            @if ($reviews !== null)
+                <section class="panel" aria-labelledby="new-reviews-heading">
+                    <div class="flex items-baseline justify-between gap-3">
+                        <h2 id="new-reviews-heading" class="section-title">New reviews</h2>
+                        <a href="{{ route('admin.reviews.index') }}" class="text-sm font-medium text-forest-700 hover:text-forest-900 hover:underline">All reviews</a>
+                    </div>
+
+                    <p class="mt-2 text-sm text-ink-soft">
+                        {{ $reviews['total'] }} {{ Str::plural('review', $reviews['total']) }} in the last {{ $newReviewDays }} days.
+                        @if ($reviews['waiting'] > 0)
+                            <span class="text-gold-700">{{ $reviews['waiting'] }} waiting for approval.</span>
+                        @endif
+                    </p>
+
+                    @forelse ($reviews['latest'] as $review)
+                        <a href="{{ route('admin.reviews.index') }}" class="mt-3 block rounded-lg border border-sand-200 px-3 py-2 transition-colors hover:bg-sand-50">
+                            <span class="flex items-center justify-between gap-3">
+                                <span class="truncate font-medium text-forest-900">{{ $review->name }}</span>
+                                <span class="shrink-0 text-sm text-gold-700" aria-label="{{ $review->rating }} out of 5 stars">{{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', max(0, 5 - $review->rating)) }}</span>
+                            </span>
+                            <span class="mt-0.5 block truncate text-sm text-ink-soft">{{ $review->comment }}</span>
+                            <span class="mt-0.5 block text-xs text-ink-soft">{{ $review->created_at->diffForHumans() }}@unless ($review->is_published) · not shown on the site yet @endunless</span>
+                        </a>
+                    @empty
+                        <p class="mt-3 text-sm text-ink-soft">No new reviews this week.</p>
+                    @endforelse
+                </section>
+            @endif
+
+        </div>
+    @endif
+
     <section class="mt-10" aria-labelledby="areas-heading">
         <h2 id="areas-heading" class="section-title">Areas of the site</h2>
 

@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\JournalController;
 use App\Models\HomeContent;
+use App\Support\ImageUploader;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class ContentController extends Controller
@@ -64,7 +67,8 @@ class ContentController extends Controller
     {
         $item = new HomeContent([
             'section' => $request->query('section'),
-            'active' => true,
+            // A new journal article starts as a draft until it is published.
+            'active' => $request->query('section') !== 'journal_articles',
         ]);
 
         return view('admin.content.form', [
@@ -152,6 +156,57 @@ class ContentController extends Controller
         return redirect()
             ->route('admin.content.edit', $content)
             ->with('status', 'Entry updated successfully.');
+    }
+
+    /**
+     * Save a new order after drag-and-drop: the ids of one section, first to last. Positions become 1, 2, 3...
+     * which is how the site reads "sort_order" everywhere.
+     */
+    public function reorder(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1', 'max:300'],
+            'ids.*' => ['integer', 'distinct', 'exists:home_contents,id'],
+        ]);
+
+        $ids = array_map('intval', array_values($data['ids']));
+        $rows = HomeContent::whereIn('id', $ids)->get()->keyBy('id');
+        $sections = $rows->pluck('section')->unique();
+
+        // One whole section at a time, so a partial list can never scramble the positions of the rest.
+        abort_unless(
+            $sections->count() === 1 && HomeContent::where('section', $sections->first())->count() === count($ids),
+            422,
+            'Send every entry of one section.'
+        );
+
+        DB::transaction(function () use ($ids, $rows): void {
+            foreach ($ids as $position => $id) {
+                $row = $rows[$id];
+
+                if ((int) $row->sort_order !== $position + 1) {
+                    $row->update(['sort_order' => $position + 1]);
+                }
+            }
+        });
+
+        return response()->json(['ok' => true]);
+    }
+
+    /**
+     * Show a journal article as visitors will see it, even while it is still a draft.
+     */
+    public function preview(HomeContent $content): View|RedirectResponse
+    {
+        abort_unless($content->section === 'journal_articles', 404);
+
+        if (trim((string) $content->title) === '') {
+            return redirect()
+                ->route('admin.content.edit', $content)
+                ->withErrors(['title' => 'Give the article a title before you preview it.']);
+        }
+
+        return app(JournalController::class)->preview($content);
     }
 
     /**
@@ -375,12 +430,8 @@ class ContentController extends Controller
                 throw \Illuminate\Validation\ValidationException::withMessages([$field => 'Upload a static SVG icon without scripts, links, external resources or animations.']);
             }
         }
-        $name = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
-        $filename = now()->format('Ymd_His').'_'.Str::uuid().'_'.$name.'.'.$file->getClientOriginalExtension();
 
-        $file->move(public_path('images'), $filename);
-
-        return 'images/'.$filename;
+        return ImageUploader::store($file);
     }
 
     /**

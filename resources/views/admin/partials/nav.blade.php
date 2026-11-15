@@ -1,3 +1,4 @@
+@php($me = auth()->user())
 <nav aria-label="Admin" class="space-y-1">
     <a href="{{ route('admin.dashboard') }}"
        @if (request()->routeIs('admin.dashboard')) aria-current="page" @endif
@@ -6,6 +7,7 @@
         Dashboard
     </a>
 
+    @if ($me->canAccess('content'))
     @php($onContent = request()->routeIs('admin.content.*'))
 
     <details class="group/content" @if ($onContent) open @endif>
@@ -35,7 +37,9 @@
             @endforeach
         </ul>
     </details>
+    @endif
 
+    @if ($me->canAccess('media'))
     @php($onMedia = request()->routeIs('admin.media.*'))
 
     <a href="{{ route('admin.media.index') }}"
@@ -44,7 +48,9 @@
         <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.16-5.16a2.25 2.25 0 013.18 0l5.16 5.16m-1.5-1.5l1.41-1.41a2.25 2.25 0 013.18 0l2.41 2.41m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.01v.01h-.01V8.25zm.38 0a.38.38 0 11-.76 0 .38.38 0 01.76 0z"/></svg>
         <span class="flex-1">Media library</span>
     </a>
+    @endif
 
+    @if ($me->canAccess('gallery'))
     @php($onGallery = request()->routeIs('admin.gallery.*'))
 
     <a href="{{ route('admin.gallery.index') }}"
@@ -53,7 +59,9 @@
         <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6.878V6a2.25 2.25 0 012.25-2.25h7.5A2.25 2.25 0 0118 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 004.5 9v.878m13.5-3A2.25 2.25 0 0119.5 9v.878m0 0a2.246 2.246 0 00-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0121 12v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6c0-.98.626-1.813 1.5-2.122"/></svg>
         <span class="flex-1">Gallery photos</span>
     </a>
+    @endif
 
+    @if ($me->canAccess('languages'))
     @php($onLanguages = request()->routeIs('admin.languages.*'))
 
     <a href="{{ route('admin.languages.edit') }}"
@@ -62,7 +70,9 @@
         <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18zM3.6 9h16.8M3.6 15h16.8M12 3c2.4 2.6 3.4 5.6 3.4 9s-1 6.4-3.4 9M12 3C9.6 5.6 8.6 8.6 8.6 12s1 6.4 3.4 9"/></svg>
         Languages
     </a>
+    @endif
 
+    @if ($me->canAccess('bookings'))
     @php($onBookings = request()->routeIs('admin.bookings.*'))
     @php($pendingBookings = \App\Models\Booking::pendingCount())
 
@@ -75,7 +85,20 @@
             <span class="rounded-full bg-gold-400 px-2 py-0.5 text-xs font-semibold text-forest-900" title="Requests waiting for a reply">{{ $pendingBookings }}</span>
         @endif
     </a>
+    @endif
 
+    @if ($me->canAccess('availability'))
+    @php($onAvailability = request()->routeIs('admin.availability.*'))
+
+    <a href="{{ route('admin.availability.index') }}"
+       @if ($onAvailability) aria-current="page" @endif
+       class="flex items-center gap-3 rounded-lg border-l-2 px-3 py-2 text-[0.9375rem] transition-colors {{ $onAvailability ? 'border-gold-400 bg-white/10 text-white' : 'border-transparent text-sand-200 hover:bg-white/5 hover:text-white' }}">
+        <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l2.25 2.25L15 10.5m6 1.5a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span class="flex-1">Availability</span>
+    </a>
+    @endif
+
+    @if ($me->canAccess('reviews'))
     @php($onReviews = request()->routeIs('admin.reviews.*'))
     @php($waitingReviews = \App\Models\Review::waitingForApproval())
 
@@ -88,7 +111,9 @@
             <span class="rounded-full bg-gold-400 px-2 py-0.5 text-xs font-semibold text-forest-900">{{ $waitingReviews }}</span>
         @endif
     </a>
+    @endif
 
+    @if ($me->canAccess('ai-brain'))
     @php($onBrain = request()->routeIs('admin.ai-brain.*'))
     @php($brainAttention = \App\Support\ChatLog::needsKnowledgeCount())
     @php($brainKeyProblem = \App\Support\AiConnection::needsAttention())
@@ -104,5 +129,33 @@
         @if ($brainAttention > 0)
             <span class="rounded-full bg-gold-400 px-2 py-0.5 text-xs font-semibold text-forest-900" title="Guest questions the AI could not answer">{{ $brainAttention }}</span>
         @endif
+    </a>
+    @endif
+
+    @php($onStaff = request()->routeIs('admin.staff.*'))
+    @php($onActivity = request()->routeIs('admin.activity.*'))
+    @php($onAccount = request()->routeIs('admin.account.*'))
+
+    @if ($me->canAccess('staff'))
+        <a href="{{ route('admin.staff.index') }}"
+           @if ($onStaff) aria-current="page" @endif
+           class="flex items-center gap-3 rounded-lg border-l-2 px-3 py-2 text-[0.9375rem] transition-colors {{ $onStaff ? 'border-gold-400 bg-white/10 text-white' : 'border-transparent text-sand-200 hover:bg-white/5 hover:text-white' }}">
+            <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+            <span class="flex-1">Staff</span>
+        </a>
+
+        <a href="{{ route('admin.activity.index') }}"
+           @if ($onActivity) aria-current="page" @endif
+           class="flex items-center gap-3 rounded-lg border-l-2 px-3 py-2 text-[0.9375rem] transition-colors {{ $onActivity ? 'border-gold-400 bg-white/10 text-white' : 'border-transparent text-sand-200 hover:bg-white/5 hover:text-white' }}">
+            <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span class="flex-1">History</span>
+        </a>
+    @endif
+
+    <a href="{{ route('admin.account.edit') }}"
+       @if ($onAccount) aria-current="page" @endif
+       class="flex items-center gap-3 rounded-lg border-l-2 px-3 py-2 text-[0.9375rem] transition-colors {{ $onAccount ? 'border-gold-400 bg-white/10 text-white' : 'border-transparent text-sand-200 hover:bg-white/5 hover:text-white' }}">
+        <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <span class="flex-1">My account</span>
     </a>
 </nav>

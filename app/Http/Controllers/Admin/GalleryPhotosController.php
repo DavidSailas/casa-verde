@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\GalleryController;
 use App\Models\HomeContent;
+use App\Support\ImageUploader;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -299,16 +300,10 @@ class GalleryPhotosController extends Controller
     }
 
     /**
-     * Save an uploaded photo in public/images, named like every other upload on the site.
+     * Save an uploaded photo in public/images: resized and converted to WebP, named like every other upload.
      */
     private function storePhoto(UploadedFile $file): string
     {
-        $name = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) ?: 'photo';
-        $extension = strtolower($file->getClientOriginalExtension()) === 'svg' ? 'svg' : ($file->guessExtension() ?: 'jpg');
-        $filename = now()->format('Ymd_His').'_'.Str::uuid().'_'.$name.'.'.$extension;
-
-        $file->move(public_path('images'), $filename);
-
-        return 'images/'.$filename;
+        return ImageUploader::store($file);
     }
 }

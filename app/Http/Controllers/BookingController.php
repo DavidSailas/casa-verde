@@ -6,6 +6,7 @@ use App\Mail\BookingReceived;
 use App\Mail\BookingRequested;
 use App\Models\Booking;
 use App\Models\HomeContent;
+use App\Support\Availability;
 use App\Support\BookingRates;
 use App\Support\BookingSettings;
 use Carbon\Carbon;
@@ -85,6 +86,12 @@ class BookingController extends Controller
         if ($quote['nights'] > $maxNights) {
             return back()->withInput()->withErrors(
                 ['check_out' => "Online requests are limited to {$maxNights} nights. Please contact us for longer stays."]
+            )->with('open_villa', $slug);
+        }
+
+        if (Availability::conflict($slug, $checkIn, $checkOut) !== null) {
+            return back()->withInput()->withErrors(
+                ['check_in' => 'Sorry, these dates are not available for this villa. Please choose other dates or contact us.']
             )->with('open_villa', $slug);
         }
 
