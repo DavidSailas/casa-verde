@@ -11,7 +11,7 @@
     $headingLength = mb_strlen(trim((string) $page['heading']));
     $headingSize = $headingLength > 18 ? 'xl' : ($headingLength > 12 ? 'lg' : '');
 @endphp
-<div class="mbp" data-count="{{ $dishCount }}">
+<div class="mbp" data-count="{{ $dishCount }}"@if(!empty($page['style'])) style="{{ $page['style'] }}"@endif>
     @if(trim((string) ($page['kicker'] ?? '')) !== '')
         <p class="mbp-kicker">{{ $page['kicker'] }}</p>
     @endif
@@ -22,7 +22,7 @@
 
     <div class="mbp-dishes">
         @foreach($page['dishes'] as $dish)
-            <article class="mbp-dish">
+            <article class="mbp-dish"@if(($dish['photo_scale'] ?? 1) != 1) style="--mb-photo-scale: {{ $dish['photo_scale'] }}"@endif>
                 <div class="mbp-photo mbp-photo--{{ $dish['shape'] ?? 'round' }}{{ $dish['image'] ? '' : ' mbp-photo--empty' }}">
                     @if($dish['image'])
                         <img src="{{ asset($dish['image']) }}" alt="{{ $dish['name'] }}" loading="lazy" decoding="async" draggable="false">

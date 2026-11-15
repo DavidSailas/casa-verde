@@ -9,7 +9,7 @@
     "isEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-MwVNpVBk.css",
+    "file": "assets/app-Bvnov9Nd.css",
     "name": "app",
     "names": [
       "app.css"
@@ -45,7 +45,7 @@
     "isEntry": true
   },
   "resources/css/drinksmenu.css": {
-    "file": "assets/drinksmenu-zM6GWGa6.css",
+    "file": "assets/drinksmenu-PmXmLotm.css",
     "name": "drinksmenu",
     "names": [
       "drinksmenu.css"
@@ -107,6 +107,15 @@
     "src": "resources/css/home-experiences.css",
     "isEntry": true
   },
+  "resources/css/home-video.css": {
+    "file": "assets/home-video-JtDNis0Y.css",
+    "name": "home-video",
+    "names": [
+      "home-video.css"
+    ],
+    "src": "resources/css/home-video.css",
+    "isEntry": true
+  },
   "resources/css/home-villas.css": {
     "file": "assets/home-villas-B6U4FXcB.css",
     "name": "home-villas",
@@ -135,7 +144,7 @@
     "isEntry": true
   },
   "resources/css/menubook.css": {
-    "file": "assets/menubook-DFLEuh96.css",
+    "file": "assets/menubook-DCdgJ63t.css",
     "name": "menubook",
     "names": [
       "menubook.css"
@@ -207,7 +216,7 @@
     "isEntry": true
   },
   "resources/css/villa.css": {
-    "file": "assets/villa-B-_SWeTA.css",
+    "file": "assets/villa-f7amHewZ.css",
     "name": "villa",
     "names": [
       "villa.css"
@@ -233,6 +242,33 @@
     "src": "resources/css/widgets.css",
     "isEntry": true
   },
+  "resources/css/winter.css": {
+    "file": "assets/winter-CumDvwgB.css",
+    "name": "winter",
+    "names": [
+      "winter.css"
+    ],
+    "src": "resources/css/winter.css",
+    "isEntry": true
+  },
+  "resources/css/yoga-book.css": {
+    "file": "assets/yoga-book-JrnhA5ji.css",
+    "name": "yoga-book",
+    "names": [
+      "yoga-book.css"
+    ],
+    "src": "resources/css/yoga-book.css",
+    "isEntry": true
+  },
+  "resources/css/yoga-v2.css": {
+    "file": "assets/yoga-v2-DTqk3s3p.css",
+    "name": "yoga-v2",
+    "names": [
+      "yoga-v2.css"
+    ],
+    "src": "resources/css/yoga-v2.css",
+    "isEntry": true
+  },
   "resources/css/yoga.css": {
     "file": "assets/yoga-B4djDRPF.css",
     "name": "yoga",
@@ -246,6 +282,12 @@
     "file": "assets/admin-editor-CwrZxoT9.js",
     "name": "admin-editor",
     "src": "resources/js/admin-editor.js",
+    "isEntry": true
+  },
+  "resources/js/admin-menu-sizes.js": {
+    "file": "assets/admin-menu-sizes-Bc96Twho.js",
+    "name": "admin-menu-sizes",
+    "src": "resources/js/admin-menu-sizes.js",
     "isEntry": true
   },
   "resources/js/admin-reorder.js": {
@@ -287,6 +329,12 @@
     "src": "resources/js/home-experiences.js",
     "isEntry": true
   },
+  "resources/js/home-video.js": {
+    "file": "assets/home-video-Y0eUPO6F.js",
+    "name": "home-video",
+    "src": "resources/js/home-video.js",
+    "isEntry": true
+  },
   "resources/js/menubook.js": {
     "file": "assets/menubook-BdpSJ10z.js",
     "name": "menubook",
@@ -309,6 +357,18 @@
     "file": "assets/widgets-LEd-Rt8Z.js",
     "name": "widgets",
     "src": "resources/js/widgets.js",
+    "isEntry": true
+  },
+  "resources/js/winter.js": {
+    "file": "assets/winter-CadvOF7X.js",
+    "name": "winter",
+    "src": "resources/js/winter.js",
+    "isEntry": true
+  },
+  "resources/js/yoga-book.js": {
+    "file": "assets/yoga-book-BJ9BcdWo.js",
+    "name": "yoga-book",
+    "src": "resources/js/yoga-book.js",
     "isEntry": true
   }
 }

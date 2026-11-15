@@ -103,11 +103,6 @@
              VILLA CARDS
         ================================================== --}}
 
-        @php
-            // If at least one villa shows quick facts, the others reserve the same row so prices and buttons line up.
-            $anyFacts = $villas->contains(fn ($v) => !empty($villaDetails[\Illuminate\Support\Str::slug($v->title)]['capacity'] ?? []));
-        @endphp
-
         <div class="villa-container" style="--villa-count: {{ max(1, $villas->count()) }}">
 
             @foreach($villas as $villa)
@@ -312,30 +307,6 @@
 
                             </ul>
 
-                        @elseif($anyFacts)
-
-                            <ul class="villa-facts villa-facts--placeholder" aria-hidden="true">
-                                <li><x-icon name="family" :size="18" /><span>&nbsp;</span></li>
-                            </ul>
-
-                        @endif
-
-
-                        @if($villa->price)
-
-                            <p class="villa-price">
-
-                                {{ $vStyle?->title }}
-                                <strong>
-                                    {{ number_format($villa->price) }}
-                                </strong>
-
-                                <span>
-                                    {{ $vStyle?->description }}
-                                </span>
-
-                            </p>
-
                         @endif
 
 
@@ -381,20 +352,41 @@
                         @endif
 
 
+                        @if($villa->price)
+
+                            <p class="villa-price">
+
+                                {{ $vStyle?->title }}
+                                <strong>
+                                    {{ number_format($villa->price) }}
+                                </strong>
+
+                                <span>
+                                    {{ $vStyle?->description }}
+                                </span>
+
+                            </p>
+
+                        @endif
+
+
                         {{-- BUTTONS: always at the bottom of the card, so cards of different heights still line up --}}
 
                         <div class="villa-actions">
 
                             <a href="{{ $cardDetailsUrl }}" class="villa-button">
 
-                                <span><x-glyph :value="$vStyle?->icon" :em="1.1" /></span>
+                                {{-- Logo badge: drawn by the site CSS from the logo set in the admin (Site-wide), same as the Home page buttons --}}
+                                <span aria-hidden="true"></span>
                                 {{ $villa->button_text ?: $vStyle?->button_text }}
+                                <svg class="villa-button__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
 
                             </a>
 
                             <a href="{{ route('booking.villa', $cardSlug) }}" class="villa-button villa-button--ghost">
 
                                 {{ $vCheckLabel }}
+                                <svg class="villa-button__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
 
                             </a>
 

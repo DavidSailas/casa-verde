@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\JournalController;
 use App\Models\HomeContent;
 use App\Support\ImageUploader;
+use App\Support\MenuSizes;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -105,6 +106,10 @@ class ContentController extends Controller
             $data['details'] = $details;
         }
 
+        if (($sizes = $this->sizes($request, (string) ($data['section'] ?? ''), null)) !== null) {
+            $data['details'] = $sizes;
+        }
+
         $item = HomeContent::create($data);
 
         return redirect()
@@ -149,6 +154,10 @@ class ContentController extends Controller
 
         if (($details = $this->details($request)) !== null) {
             $data['details'] = $details;
+        }
+
+        if (($sizes = $this->sizes($request, (string) ($data['section'] ?? $content->section), $content)) !== null) {
+            $data['details'] = $sizes;
         }
 
         $content->update($data);
@@ -246,6 +255,8 @@ class ContentController extends Controller
             'gallery.*' => ['string', 'max:255'],
             'gallery_new' => ['nullable', 'array', 'max:20'],
             'gallery_new.*' => ['file', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'],
+            'sizes' => ['nullable', 'array'],
+            'sizes.*' => ['nullable', 'string', 'max:20'],
             'details' => ['nullable', 'array'],
             'details.intro' => ['nullable', 'string', 'max:2000'],
             'details.story_title' => ['nullable', 'string', 'max:300'],
@@ -302,7 +313,7 @@ class ContentController extends Controller
             unset($data['sort_order']);
         }
 
-        unset($data['image'], $data['icon_image'], $data['perk_icon_image'], $data['gallery'], $data['gallery_new'], $data['details'], $data['detail_hero'], $data['detail_plan']);
+        unset($data['image'], $data['icon_image'], $data['perk_icon_image'], $data['gallery'], $data['gallery_new'], $data['details'], $data['sizes'], $data['detail_hero'], $data['detail_plan']);
 
         return $data;
     }
@@ -313,7 +324,27 @@ class ContentController extends Controller
      */
     protected function storeImage(Request $request, string $field = 'image'): string
     {
-        return $this->storeFile($request->file($field), $field);
+        return $this->storeFile($request->file($field), $field, MenuSizes::uploadLimit($request->input('section'), $field));
+    }
+
+    /**
+     * The "Display size" choices of a menu entry (food menu book, drinks menu, a dish), merged into its saved details so
+     * nothing else stored there is lost. Null when the form had no such box or the section has no size settings.
+     *
+     * @return array<string, mixed>|null
+     */
+    protected function sizes(Request $request, string $section, ?HomeContent $existing): ?array
+    {
+        if (! $request->boolean('sizes_present')
+            || MenuSizes::settingsFor($section) === null
+            || ! \Illuminate\Support\Facades\Schema::hasColumn('home_contents', 'details')) {
+            return null;
+        }
+
+        $details = (array) ($existing?->details ?? []);
+        $details['display'] = MenuSizes::clean($section, (array) $request->input('sizes', []));
+
+        return $details;
     }
 
     /**
@@ -422,7 +453,7 @@ class ContentController extends Controller
         ];
     }
 
-    protected function storeFile(\Illuminate\Http\UploadedFile $file, string $field): string
+    protected function storeFile(\Illuminate\Http\UploadedFile $file, string $field, ?int $maxSide = null): string
     {
         if (strtolower($file->getClientOriginalExtension()) === 'svg') {
             $svg = file_get_contents($file->getRealPath());
@@ -431,7 +462,7 @@ class ContentController extends Controller
             }
         }
 
-        return ImageUploader::store($file);
+        return ImageUploader::store($file, $maxSide);
     }
 
     /**

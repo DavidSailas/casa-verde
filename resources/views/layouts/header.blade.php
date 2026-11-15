@@ -222,3 +222,207 @@ html::-webkit-scrollbar-corner{background:#06211b}
 @media(max-width:700px){html::-webkit-scrollbar{width:8px}html::-webkit-scrollbar-thumb{border-width:2px}}
 </style>
 <script defer src="{{ asset('js/casa-currency.js') }}?v=2" data-rates-url="{{ route('currency.rates') }}"></script>
+
+{{-- Header polish: glass bar once scrolled, reading-progress line, refined links and Book button, animated mobile menu.
+     Inline on purpose (like the language menu), so it works without a rebuild. Sizes and letter-spacing of the menu
+     links are left alone: the language fitter (cvFitNav) measures them. --}}
+<style id="cv-header-polish">
+/* ---------- Bar: soft gradient, fading gold hairline, reading-progress line ---------- */
+header.navbar {
+    border-bottom: 0;
+    background: linear-gradient(180deg, #05271f 0%, #04201a 100%);
+    transition: height .35s cubic-bezier(.22, 1, .36, 1), background .35s ease, box-shadow .35s ease;
+}
+header.navbar::before {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(216, 180, 130, .55) 18%, rgba(216, 180, 130, .55) 82%, transparent);
+    pointer-events: none;
+}
+header.navbar::after {
+    content: "";
+    position: absolute;
+    left: 0; bottom: 0;
+    width: 100%; height: 2px;
+    background: linear-gradient(90deg, #b98b55, #f0cc8e);
+    transform-origin: left center;
+    transform: scaleX(var(--cv-scroll, 0));
+    opacity: 0;
+    transition: opacity .3s ease;
+    pointer-events: none;
+}
+header.navbar.is-scrolled::after { opacity: 1; }
+
+/* Scrolled: frosted glass with a soft shadow */
+header.navbar.is-scrolled {
+    background: rgba(4, 32, 26, .86);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+            backdrop-filter: blur(14px) saturate(140%);
+    box-shadow: 0 14px 34px -16px rgba(0, 0, 0, .65);
+}
+/* ---------- Logo lockup: emblem, name, subtitle: centred, with room above and below ----------
+   The bar keeps the same height when scrolled (it used to shrink and the logo spilled out of it). */
+header.navbar .logo-area {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(4px, .38vw, 6px);
+}
+header.navbar .logo-area img {
+    width: clamp(30px, 2.3vw, 40px);
+    height: clamp(30px, 2.3vw, 40px);
+    filter: drop-shadow(0 0 10px rgba(216, 180, 130, .28));
+    transition: transform .4s cubic-bezier(.22, 1, .36, 1), filter .4s ease;
+}
+header.navbar .logo-area:hover img { transform: scale(1.07); filter: drop-shadow(0 0 14px rgba(240, 204, 142, .5)); }
+
+header.navbar .logo-text { align-items: center; text-align: center; gap: clamp(3px, .3vw, 5px); }
+header.navbar .logo-text span { color: #dcb887; letter-spacing: .16em; transition: color .3s ease; }
+header.navbar .logo-area:hover .logo-text span { color: #f1cf9c; }
+
+/* Subtitle set between two short gold hairlines */
+header.navbar .logo-text small {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    color: #c4ae85;
+    letter-spacing: .24em;
+}
+header.navbar .logo-text small::before,
+header.navbar .logo-text small::after {
+    content: "";
+    display: block;
+    flex: none;
+    width: clamp(10px, 1.1vw, 20px);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(216, 180, 130, .75));
+}
+header.navbar .logo-text small::after { transform: scaleX(-1); }
+@media (max-width: 560px) { header.navbar .logo-text small { display: none; } }
+
+/* ---------- Menu links: gold gradient underline that grows from the centre ---------- */
+.nav-links a:not(.book-button)::after {
+    left: 0; right: 0; bottom: 0;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #b98b55, #f0cc8e, #b98b55);
+    transform-origin: center;
+    transition: transform .35s cubic-bezier(.22, 1, .36, 1);
+}
+.nav-links a:not(.book-button):focus-visible { outline: 2px solid #f1cf9c; outline-offset: 6px; border-radius: 4px; }
+
+/* Dropdown panels: a touch deeper and softer */
+.nav-links .nav-sub {
+    background: rgba(5, 30, 25, .98);
+    box-shadow: 0 28px 52px -18px rgba(0, 0, 0, .7), 0 0 0 1px rgba(216, 180, 130, .08);
+}
+.cv-lang__btn { transition: background .25s, color .25s, border-color .25s, box-shadow .25s; }
+.cv-lang__btn:hover, .cv-lang__btn[aria-expanded="true"] { box-shadow: 0 0 0 3px rgba(216, 180, 130, .12); }
+
+/* ---------- Book your stay: warm gradient, glow and a light sweep on hover ---------- */
+header.navbar .book-button {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, #e8b878 0%, #d49b5c 100%);
+    box-shadow: 0 10px 24px -12px rgba(217, 163, 102, .8), inset 0 1px 0 rgba(255, 255, 255, .4);
+    transition: transform .3s cubic-bezier(.22, 1, .36, 1), box-shadow .3s ease, filter .3s ease;
+}
+header.navbar .book-button::before {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0;
+    left: -70%;
+    width: 40%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .55), transparent);
+    transform: skewX(-20deg);
+    transition: left .7s cubic-bezier(.22, 1, .36, 1);
+    pointer-events: none;
+}
+header.navbar .book-button:hover,
+header.navbar .book-button:focus-visible {
+    background: linear-gradient(180deg, #efc283 0%, #dca565 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 16px 30px -12px rgba(217, 163, 102, .95), inset 0 1px 0 rgba(255, 255, 255, .5);
+    outline: none;
+}
+header.navbar .book-button:hover::before,
+header.navbar .book-button:focus-visible::before { left: 130%; }
+header.navbar .book-button:focus-visible { box-shadow: 0 0 0 3px #04201a, 0 0 0 5px #f0cc8e; }
+header.navbar .book-button:active { transform: translateY(0); filter: brightness(.96); }
+
+/* ---------- Phone / tablet menu ---------- */
+@media (max-width: 1180px) {
+    header.navbar .nav-toggle { transition: background .25s, border-color .25s; }
+    header.navbar .nav-toggle:hover,
+    header.navbar.nav-open .nav-toggle { background: rgba(216, 180, 130, .14); border-color: rgba(216, 180, 130, .8); }
+
+    header.navbar .nav-links {
+        background: rgba(4, 32, 26, .97);
+        -webkit-backdrop-filter: blur(14px);
+                backdrop-filter: blur(14px);
+        border-bottom: 0;
+        box-shadow: 0 34px 50px -22px rgba(0, 0, 0, .7);
+    }
+    .nav-open .nav-links { animation: cv-menu-in .35s cubic-bezier(.22, 1, .36, 1); }
+    .nav-open .nav-links > a,
+    .nav-open .nav-links > .nav-item { animation: cv-link-in .5s cubic-bezier(.22, 1, .36, 1) both; }
+    .nav-open .nav-links > :nth-child(1) { animation-delay: .04s; }
+    .nav-open .nav-links > :nth-child(2) { animation-delay: .08s; }
+    .nav-open .nav-links > :nth-child(3) { animation-delay: .12s; }
+    .nav-open .nav-links > :nth-child(4) { animation-delay: .16s; }
+    .nav-open .nav-links > :nth-child(5) { animation-delay: .20s; }
+    .nav-open .nav-links > :nth-child(6) { animation-delay: .24s; }
+    .nav-open .nav-links > :nth-child(n+7) { animation-delay: .28s; }
+
+    /* The active page is easy to spot: gold text and a gold bar on the left */
+    .nav-links a.is-active:not(.book-button) { color: #f1cf9c; box-shadow: inset 2px 0 0 #d7a468; padding-left: 14px; }
+
+    /* Full-width Book button at the bottom of the menu: easy to reach with a thumb */
+    header.navbar .nav-links .nav-book-mobile {
+        align-self: stretch;
+        justify-content: center;
+        margin: 22px 0 0;
+        min-height: 50px;
+        font-size: .8rem;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+    }
+}
+@keyframes cv-menu-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+@keyframes cv-link-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+    header.navbar, header.navbar *, header.navbar::after { animation: none !important; transition: none !important; }
+}
+</style>
+<script>
+/* Header polish: reading-progress line and the scrolled look (app.js sets the same class; this keeps it working on its own). */
+(function () {
+    var bar = document.querySelector('.navbar');
+    if (!bar) return;
+
+    var queued = false;
+
+    function update() {
+        queued = false;
+        var max = document.documentElement.scrollHeight - window.innerHeight;
+        var progress = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+        bar.style.setProperty('--cv-scroll', progress.toFixed(4));
+        bar.classList.toggle('is-scrolled', window.scrollY > 8);
+    }
+
+    function queue() {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(update);
+    }
+
+    window.addEventListener('scroll', queue, { passive: true });
+    window.addEventListener('resize', queue);
+    window.addEventListener('pageshow', queue);
+    update();
+})();
+</script>

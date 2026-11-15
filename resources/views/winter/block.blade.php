@@ -58,22 +58,34 @@
                         @endif
                     </div>
                     @if($hasImage)
-                        <figure class="wr-photo"><img src="{{ asset($tab['image']) }}" alt="" loading="lazy"></figure>
+                        <figure class="wr-photo">
+                            <button type="button" class="wr-zoom" data-wr-zoom data-full="{{ asset($tab['image']) }}" data-caption="{{ $tab['heading'] }}" aria-label="Foto vergrößern: {{ $tab['heading'] }}">
+                                <img src="{{ asset($tab['image']) }}" alt="{{ $tab['heading'] }}" loading="lazy">
+                                <span class="wr-zoom__hint" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2M11 8.5v5M8.5 11h5"/></svg></span>
+                            </button>
+                        </figure>
                     @endif
                 </div>
 
                 @if($tab['cards'] !== [])
                     <ul @class(['wr-cards', 'wr-cards--'.min(count($tab['cards']), 4), 'wr-cards--photos' => $photoOnly])>
                         @foreach($tab['cards'] as $card)
-                            <li class="wr-card">
-                                @if(trim((string) $card['title']) !== '')
-                                    <h4>{{ $card['title'] }}</h4>
-                                @endif
+                            <li class="wr-card" style="--wr-i: {{ $loop->index }}">
                                 @if(filled($card['image']) && file_exists(public_path($card['image'])))
-                                    <img src="{{ asset($card['image']) }}" alt="{{ $card['title'] ?: $tab['heading'] }}" loading="lazy">
+                                    <button type="button" class="wr-zoom" data-wr-zoom data-full="{{ asset($card['image']) }}" data-caption="{{ trim($card['title'].' '.($card['title'] !== '' && $card['text'] !== '' ? '— ' : '').$card['text']) }}" aria-label="Foto vergrößern: {{ $card['title'] ?: $tab['heading'] }}">
+                                        <img src="{{ asset($card['image']) }}" alt="{{ $card['title'] ?: $tab['heading'] }}" loading="lazy">
+                                        <span class="wr-zoom__hint" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2M11 8.5v5M8.5 11h5"/></svg></span>
+                                    </button>
                                 @endif
-                                @if(trim((string) $card['text']) !== '')
-                                    <p>{{ $card['text'] }}</p>
+                                @if(trim((string) $card['title']) !== '' || trim((string) $card['text']) !== '')
+                                    <div class="wr-card__body">
+                                        @if(trim((string) $card['title']) !== '')
+                                            <h4>{{ $card['title'] }}</h4>
+                                        @endif
+                                        @if(trim((string) $card['text']) !== '')
+                                            <p>{{ $card['text'] }}</p>
+                                        @endif
+                                    </div>
                                 @endif
                             </li>
                         @endforeach
@@ -192,10 +204,16 @@
                     panels[i].hidden = !on;
                 });
                 if (focus) { tabs[index].focus(); }
+                tabs[index].scrollIntoView({ block: 'nearest', inline: 'center' });
+                document.dispatchEvent(new CustomEvent('wr:panel', { detail: panels[index] }));
             }
 
             tabs.forEach(function (tab, i) {
-                tab.addEventListener('click', function () { show(i, false); });
+                tab.addEventListener('click', function () {
+                    show(i, false);
+                    var top = root.querySelector('.wr-tabs').getBoundingClientRect().top;
+                    if (top < 0) { root.querySelector('.wr-head').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+                });
                 tab.addEventListener('keydown', function (event) {
                     var next = null;
                     if (event.key === 'ArrowRight') { next = (i + 1) % tabs.length; }

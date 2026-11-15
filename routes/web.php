@@ -17,6 +17,7 @@ use App\Http\Controllers\WinterController;
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\YogaBookingController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/currency-rates', function () {
@@ -63,6 +64,11 @@ Route::post('/reviews', [ReviewController::class, 'store'])
     ->middleware('throttle:5,10')
     ->name('reviews.store');
 Route::get('/yoga-reset', [YogaController::class, 'index'])->name('yoga.index');
+Route::get('/yoga-reset/book', [YogaBookingController::class, 'index'])->name('yoga.book');
+Route::get('/yoga-reset/book/received', [YogaBookingController::class, 'confirmed'])->name('yoga.book.confirmed');
+Route::post('/yoga-reset/book', [YogaBookingController::class, 'store'])
+    ->middleware('throttle:6,10')
+    ->name('yoga.book.store');
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery.index');
 Route::get('/special-offers', [OfferController::class, 'index'])->name('offers.index');
 Route::get('/about', [AboutController::class, 'index'])->name('about.index'); 

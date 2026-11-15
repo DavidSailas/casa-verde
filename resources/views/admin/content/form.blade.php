@@ -10,6 +10,11 @@
         $show = fn (string $field) => ! in_array($field, $meta['hide'] ?? [], true);
         $hint = fn (string $field) => $meta['hints'][$field] ?? null;
         $isArticle = old('section', $item->section) === 'journal_articles';
+        // Menu entries (food menu book, drinks menu, a dish) get a "Display size" box with a live preview.
+        $sizeSection = (string) old('section', $item->section);
+        $sizeSettings = \App\Support\MenuSizes::settingsFor($sizeSection);
+        $sizeKind = ['dining_page_food_menu' => 'food', 'dining_page_drinks_menu' => 'drinks', 'dining_page_food_menu_dishes' => 'dish'][$sizeSection] ?? null;
+        $sizeVars = ['food' => ['photo' => '--p', 'icon' => '--i', 'legend' => '--l'], 'drinks' => ['photo' => '--c', 'logo' => '--g'], 'dish' => ['photo' => '--p']][$sizeKind] ?? [];
     @endphp
 
     <a href="{{ route('admin.content.index', $item->section ? ['section' => $item->section] : []) }}"
@@ -418,6 +423,96 @@
                 </div>
             </section>
             @endif
+            @if ($sizeSettings !== null)
+            @php
+                // For a single dish the preview starts from the size chosen for the whole menu.
+                $menuCover = $sizeKind === 'dish' ? \App\Models\HomeContent::where('section', \App\Support\MenuSizes::FOOD)->first() : null;
+                $sizeBase = $sizeKind === 'dish' ? \App\Support\MenuSizes::value($menuCover, \App\Support\MenuSizes::FOOD, 'photo') : 1;
+                $sampleIcons = ['seafood', 'chili', 'nuts'];
+            @endphp
+            <section class="panel" aria-labelledby="sizes-heading" data-size-box data-base="{{ $sizeBase }}">
+                <h2 id="sizes-heading" class="section-title">Display size</h2>
+                <p class="field-hint">Choose a ready-made size. The preview shows the effect and nothing changes on the site until you save. Sizes are limited so a page can never overflow.</p>
+                <input type="hidden" name="sizes_present" value="1">
+
+                <div class="mt-5 grid gap-6 lg:grid-cols-2">
+                    <div class="space-y-6">
+                        @foreach ($sizeSettings as $key => $setting)
+                            @php
+                                $current = old("sizes.$key", \App\Support\MenuSizes::choice($item, $sizeSection, $key));
+                            @endphp
+                            <fieldset>
+                                <legend class="field-label">{{ $setting['label'] }}</legend>
+                                <div class="mt-2 flex flex-wrap gap-2" role="radiogroup">
+                                    @foreach ($setting['options'] as $value => [$optionLabel, $factor])
+                                        <label class="cursor-pointer">
+                                            <input type="radio" class="peer sr-only" name="sizes[{{ $key }}]" value="{{ $value }}"
+                                                   data-size-var="{{ $sizeVars[$key] ?? '' }}" data-size-value="{{ $factor }}"
+                                                   @if ($value === $setting['default']) data-default @endif
+                                                   @checked($current === $value)>
+                                            <span class="inline-flex min-h-11 items-center rounded-lg border border-sand-300 bg-white px-4 text-sm text-forest-900 transition-colors hover:bg-sand-50 peer-checked:border-forest-700 peer-checked:bg-forest-700 peer-checked:text-sand-50 peer-focus-visible:ring-4 peer-focus-visible:ring-gold-400/40">{{ $optionLabel }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                                <p class="field-hint">{{ $setting['help'] }}</p>
+                            </fieldset>
+                        @endforeach
+
+                        <button type="button" class="btn-secondary" data-size-reset>Back to standard sizes</button>
+                    </div>
+
+                    {{-- Live preview: a simplified sample, so the choice can be judged before saving. --}}
+                    <div data-size-preview style="--p: {{ $sizeBase }}; --b: {{ $sizeBase }}; --i: 1; --l: 1; --c: 3; --g: 1;"
+                         class="self-start rounded-xl border border-sand-300 bg-[#f4efe9] p-4" aria-hidden="true">
+                        <p class="text-xs uppercase tracking-wide text-ink-soft">Preview</p>
+
+                        @if ($sizeKind === 'drinks')
+                            <div class="mt-3 flex items-center gap-3 rounded-lg bg-forest-900 px-3 py-2 text-sand-50">
+                                <span class="shrink-0 rounded-full bg-gold-400/80" style="width: calc(1.75rem * var(--g)); height: calc(1.75rem * var(--g));"></span>
+                                <span class="text-xs font-semibold uppercase tracking-widest">Drinks menu</span>
+                            </div>
+                            <div class="mt-3 grid gap-2" style="grid-template-columns: repeat(var(--c), minmax(0, 1fr));">
+                                @foreach (range(1, 6) as $card)
+                                    <div class="overflow-hidden rounded-md border border-sand-300 bg-white">
+                                        <div class="aspect-[4/3] bg-gradient-to-br from-sand-200 to-sand-300"></div>
+                                        <div class="space-y-1 p-1.5"><div class="h-1.5 w-3/4 rounded bg-sand-300"></div><div class="h-1.5 w-1/2 rounded bg-sand-200"></div></div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="mt-3 flex items-center gap-4">
+                                <div class="relative h-32 w-32 shrink-0">
+                                    <span class="absolute left-1/2 top-1/2 rounded-full border border-dashed border-sand-400" style="width: calc(100% * var(--b) / 1.3); height: calc(100% * var(--b) / 1.3); transform: translate(-50%, -50%);" title="Standard size"></span>
+                                    <span class="absolute left-1/2 top-1/2 rounded-full bg-sand-200 bg-cover bg-center" style="width: calc(100% * var(--p) / 1.3); height: calc(100% * var(--p) / 1.3); transform: translate(-50%, -50%); @if ($sizeKind === 'dish' && $item->image) background-image: url('{{ asset($item->image) }}'); @endif"></span>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold uppercase tracking-wider text-ink">
+                                        Dish name
+                                        <span class="ml-1 inline-flex items-center gap-1 align-middle text-ink-soft">
+                                            @foreach ($sampleIcons as $icon)
+                                                <svg viewBox="0 0 24 24" fill="currentColor" style="width: calc(1rem * var(--i)); height: calc(1rem * var(--i));">{!! \App\Support\FoodMenu::ICONS[$icon][1] !!}</svg>
+                                            @endforeach
+                                        </span>
+                                    </p>
+                                    <div class="mt-1 space-y-1"><div class="h-1.5 w-40 rounded bg-sand-300"></div><div class="h-1.5 w-32 rounded bg-sand-200"></div></div>
+                                </div>
+                            </div>
+                            @if ($sizeKind === 'food')
+                                <div class="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 border-t border-sand-300 pt-3 text-ink-soft">
+                                    @foreach (['seafood', 'chili', 'nuts', 'cheese'] as $icon)
+                                        <span class="flex flex-col items-center gap-0.5">
+                                            <svg viewBox="0 0 24 24" fill="currentColor" style="width: calc(1.25rem * var(--l)); height: calc(1.25rem * var(--l));">{!! \App\Support\FoodMenu::ICONS[$icon][1] !!}</svg>
+                                            <span class="text-[10px] uppercase">{{ \App\Support\FoodMenu::ICONS[$icon][0] }}</span>
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @endif
+                            <p class="mt-3 text-xs text-ink-soft">The dotted circle is the standard photo size.</p>
+                        @endif
+                    </div>
+                </div>
+            </section>
+            @endif
         </div>
 
         <aside class="space-y-6">
@@ -533,6 +628,12 @@
     @if ($isArticle)
         @push('scripts')
             @vite('resources/js/admin-editor.js')
+        @endpush
+    @endif
+
+    @if ($sizeSettings !== null)
+        @push('scripts')
+            @vite('resources/js/admin-menu-sizes.js')
         @endpush
     @endif
 

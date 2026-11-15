@@ -16,6 +16,24 @@ class YogaController extends Controller
      */
     protected Collection $rows;
 
+    /**
+     * The Yoga Reset content (admin entries over the starting content), so the booking page
+     * can show the same classes, prices and photos as this page.
+     *
+     * @return array<string, mixed>
+     */
+    public function pageData(): array
+    {
+        $this->rows = HomeContent::where('section', 'like', 'yoga_%')
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get()
+            ->filter(fn (HomeContent $r): bool => str_starts_with((string) $r->section, 'yoga_'))
+            ->groupBy('section');
+
+        return $this->buildPage(config('yoga'));
+    }
+
     public function index(): View
     {
         $contents = HomeContent::where('active', true)

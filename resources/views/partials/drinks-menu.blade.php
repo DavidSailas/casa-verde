@@ -34,7 +34,7 @@
     };
 @endphp
 
-<dialog class="dm" id="{{ $id }}" data-dm aria-labelledby="{{ $id }}-title">
+<dialog class="dm" id="{{ $id }}" data-dm aria-labelledby="{{ $id }}-title"@if(!empty($menu['style'])) style="{{ $menu['style'] }}"@endif>
     <div class="dm-frame">
 
         <header class="dm-bar" data-dm-bar>

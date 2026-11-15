@@ -309,7 +309,7 @@ return [
         ],
         'dining_page_food_menu' => [
             'title' => 'Food menu book: cover',
-            'help' => 'The cover of the menu book that opens when guests click the EXPLORE FOOD MENU button (its link must be #food-menu). Guests see the cover with a "Click here" hint; clicking it opens the book. The pages are built from "Food menu book: categories" and "Food menu book: dishes". Remove the cover image to turn the book off.',
+            'help' => 'Under "Display size" you can make the dish photos and icons of the book smaller or larger. The cover of the menu book that opens when guests click the EXPLORE FOOD MENU button (its link must be #food-menu). Guests see the cover with a "Click here" hint; clicking it opens the book. The pages are built from "Food menu book: categories" and "Food menu book: dishes". Remove the cover image to turn the book off.',
             'fields' => ['title' => 'Menu name', 'image' => 'Cover image', 'button_text' => 'Button on the cover', 'description' => 'Helper line under the open book', 'subtitle' => 'Footer text on every page', 'icon' => 'Footer logo on every page (image / symbol)'],
             'hints' => [
                 'title' => 'Used as the name of the book for screen readers.',
@@ -333,7 +333,7 @@ return [
         ],
         'dining_page_food_menu_dishes' => [
             'title' => 'Food menu book: dishes',
-            'help' => 'One entry per dish. Add a new recipe here with its name, price, description and photo, then choose its category: the book makes room for it automatically (photos alternate left and right). Use the position number to reorder dishes within a category.',
+            'help' => 'Under "Display size" you can make the photo of one dish smaller or larger than the rest. One entry per dish. Add a new recipe here with its name, price, description and photo, then choose its category: the book makes room for it automatically (photos alternate left and right). Use the position number to reorder dishes within a category.',
             'fields' => [
                 'title' => 'Dish name',
                 'subtitle' => 'Category',
@@ -373,7 +373,7 @@ return [
         ],
         'dining_page_drinks_menu' => [
             'title' => 'Drinks menu: title and notes',
-            'help' => 'The heading and notes of the drinks menu that opens when guests click the EXPLORE DRINKS MENU button. The menu is built from "Drinks menu: categories" and "Drinks menu: drinks" below, and it is only offered once at least one drink is shown on the live site.',
+            'help' => 'Under "Display size" you can choose how large the drink photo cards and the logo are. The heading and notes of the drinks menu that opens when guests click the EXPLORE DRINKS MENU button. The menu is built from "Drinks menu: categories" and "Drinks menu: drinks" below, and it is only offered once at least one drink is shown on the live site.',
             'fields' => ['title' => 'Menu title', 'subtitle' => 'Line under the title', 'button_text' => 'Currency', 'description' => 'Note at the bottom of the menu', 'icon' => 'Logo in the menu header (image / symbol)'],
             'hints' => [
                 'title' => 'For example Drinks Menu.',

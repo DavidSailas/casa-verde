@@ -28,7 +28,7 @@
                                     @endif
                                 </div>
                                 @if($session['button_text'])
-                                    <a href="{{ $href($session['button_url']) }}" class="yg-btn yg-btn--green yg-btn--sm">{{ $session['button_text'] }} <span aria-hidden="true">→</span></a>
+                                    <a href="{{ $href($session['button_url'], preg_match('/appointment/i', (string) $group['label']) ? 'private' : 'class', preg_match('/appointment/i', (string) $group['label']) ? null : $session['name']) }}" class="yg-btn yg-btn--green yg-btn--sm">{{ $session['button_text'] }} <span aria-hidden="true">→</span></a>
                                 @endif
                             </div>
                         @endforeach

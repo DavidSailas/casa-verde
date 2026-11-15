@@ -34,7 +34,7 @@
                         </ul>
                     @endif
                     @if($page['package']['price']['button_text'])
-                        <a href="{{ $href($page['package']['price']['button_url']) }}" class="yg-btn yg-btn--gold yg-btn--block">{{ $page['package']['price']['button_text'] }}</a>
+                        <a href="{{ $href($page['package']['price']['button_url'], 'retreat') }}" class="yg-btn yg-btn--gold yg-btn--block">{{ $page['package']['price']['button_text'] }}</a>
                     @endif
                 </aside>
             @endif

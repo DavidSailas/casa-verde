@@ -28,7 +28,8 @@ class FoodMenu
 
     /**
      * The pages in reading order. Each page is
-     * ['type' => 'dishes', 'kicker' => string, 'heading' => string, 'dishes' => [...], 'legend' => [...], 'brand' => [...]].
+     * ['type' => 'dishes', 'kicker' => string, 'heading' => string, 'dishes' => [...], 'legend' => [...], 'brand' => [...], 'style' => string].
+     * 'style' holds the icon sizes chosen in the admin as CSS variables, and each dish has its own 'photo_scale' (1 = standard).
      *
      * The book follows the admin: every category (in its saved order) becomes the heading of its pages, and
      * the dishes that belong to it fill those pages, so a new dish or a new category simply adds pages.
@@ -103,6 +104,8 @@ class FoodMenu
             'icon' => trim((string) $cover?->icon),
         ];
 
+        $sizes = MenuSizes::foodStyle($cover);
+
         $pages = [];
         foreach ($categories as $index => $category) {
             $perPage = (int) trim((string) $category->subtitle);
@@ -113,9 +116,10 @@ class FoodMenu
                     'type' => 'dishes',
                     'kicker' => trim((string) $category->description),
                     'heading' => trim((string) $category->title),
-                    'dishes' => array_map(fn (HomeContent $dish): array => static::dish($dish, $icons), $chunk),
+                    'dishes' => array_map(fn (HomeContent $dish): array => static::dish($dish, $icons, $cover), $chunk),
                     'legend' => array_values($icons),
                     'brand' => $brand,
+                    'style' => $sizes,
                 ];
             }
         }
@@ -199,7 +203,7 @@ class FoodMenu
      * @param  array<string, array{label: string, svg: ?string, image: ?string}>  $icons
      * @return array<string, mixed>
      */
-    protected static function dish(HomeContent $dish, array $icons): array
+    protected static function dish(HomeContent $dish, array $icons, ?HomeContent $cover = null): array
     {
         $price = $dish->price;
 
@@ -232,6 +236,7 @@ class FoodMenu
             'text' => (string) $dish->description,
             'image' => $image,
             'shape' => $shape,
+            'photo_scale' => MenuSizes::dishPhotoScale($cover, $dish),
             'icons' => $dishIcons,
         ];
     }

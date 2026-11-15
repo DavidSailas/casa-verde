@@ -265,4 +265,22 @@ return [
         ],
     ],
 
+    // The Yoga Reset booking page (/yoga-reset/book). Text of the request form.
+    'booking' => [
+        'eyebrow' => 'Book your reset',
+        'title' => 'Reserve your Yoga Reset',
+        'text' => 'Choose your experience, pick a date and send your request. Our team confirms it with you by email.',
+        'steps' => ['Choose', 'Date & guests', 'Your details'],
+        'options' => [
+            'retreat' => ['title' => 'Yoga Reset stay', 'text' => 'The full reset: classes with our teachers during your stay on the cliff.'],
+            'class' => ['title' => 'Open class', 'text' => 'Join a sunrise or sunset class on the cliffside deck.'],
+            'private' => ['title' => 'Private session', 'text' => 'One-to-one or small group, at a time and pace that suits you.'],
+        ],
+        'times' => ['Morning', 'Afternoon', 'Evening', 'Flexible'],
+        'levels' => ['Beginner', 'Some experience', 'Experienced'],
+        'terms' => "This is a booking request, not a confirmed booking. Our team will confirm availability and details with you by email.\nClasses move to a covered space if it rains, with the same teacher.",
+        'agree' => 'I understand this is a request and agree to be contacted about it.',
+        'submit' => 'Send my request',
+    ],
+
 ];

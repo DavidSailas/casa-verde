@@ -76,7 +76,9 @@
                     <p class="-mt-1 mb-3 max-w-2xl text-sm text-ink-soft">{{ config('admin.sections.'.$block['name'].'.help') }}</p>
                 @endif
 
-                @php($isArticles = $block['name'] === 'journal_articles')
+                @php
+                    $isArticles = $block['name'] === 'journal_articles';
+                @endphp
 
                 @if (count($block['items']) > 1)
                     <p class="mb-2 text-sm text-ink-soft">Drag the handle on the left to change the order. With a keyboard, focus the handle and press the up or down arrow.</p>

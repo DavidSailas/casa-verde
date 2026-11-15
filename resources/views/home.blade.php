@@ -16,6 +16,8 @@
     @vite([
         'resources/css/header.css',
         'resources/css/home.css',
+        'resources/css/home-video.css',
+        'resources/js/home-video.js',
         'resources/css/theme.css',
         'resources/css/home-villas.css',
         'resources/css/home-experiences.css',
@@ -40,6 +42,9 @@
     $site = $contents->get('site', collect())->first();
 
     $hero = $contents->get('hero', collect())->first();
+
+    // YouTube film opened by the hero play button (the 11-character id from the video URL).
+    $heroVideoId = 'XDJz80f0Pgw';
 
     $hl = fn (int $n) => \App\Models\HomeContent::pageItem($contents, 'home_labels', $n);
     // A symbol / icon image set on a section's own entry wins over the shared "Home page: symbols and wording" entries.
@@ -200,6 +205,20 @@ $contactFooter = $contents
 
             </a>
 
+
+            <button
+                type="button"
+                class="hero-watch"
+                data-video-open
+                data-video-id="{{ $heroVideoId }}"
+                aria-haspopup="dialog"
+            >
+                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+                    <path d="M8 5.5v13a1 1 0 0 0 1.52.85l10.4-6.5a1 1 0 0 0 0-1.7L9.52 4.65A1 1 0 0 0 8 5.5Z" fill="currentColor"/>
+                </svg>
+                Watch the film
+            </button>
+
         </div>
 
     </div>
@@ -212,11 +231,38 @@ $contactFooter = $contents
 
         <div class="video-border">
 
-            <button class="play-button">
+            <img
+                class="video-thumb"
+                src="https://i.ytimg.com/vi/{{ $heroVideoId }}/hqdefault.jpg"
+                alt=""
+                loading="lazy"
+                decoding="async"
+                aria-hidden="true"
+            >
 
-                <x-glyph :value="$hl(5)?->icon" :em="1" />
+            <span class="video-shade" aria-hidden="true"></span>
+
+            <button
+                type="button"
+                class="play-button"
+                data-video-open
+                data-video-id="{{ $heroVideoId }}"
+                aria-haspopup="dialog"
+                aria-label="Play the Casa Verde film"
+            >
+
+                <span class="play-ring" aria-hidden="true"></span>
+                <span class="play-ring play-ring--2" aria-hidden="true"></span>
+
+                <span class="play-core">
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+                        <path d="M8 5.5v13a1 1 0 0 0 1.52.85l10.4-6.5a1 1 0 0 0 0-1.7L9.52 4.65A1 1 0 0 0 8 5.5Z" fill="currentColor"/>
+                    </svg>
+                </span>
 
             </button>
+
+            <span class="video-caption" aria-hidden="true">Watch the film</span>
 
         </div>
 

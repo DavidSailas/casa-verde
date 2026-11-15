@@ -11,10 +11,11 @@
         'resources/css/pages.css',
         'resources/css/theme.css',
         'resources/css/footer.css','resources/css/rule.css', 'resources/css/responsive.css',
+        'resources/css/winter.css', 'resources/js/winter.js',
         'resources/js/app.js'
     ])
 </head>
-<body>
+<body data-no-photo-viewer>
     @include('layouts.header')
 
     <main class="cv-page wr-main">

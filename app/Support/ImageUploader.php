@@ -21,14 +21,15 @@ class ImageUploader
     private const CONVERTIBLE = ['image/jpeg', 'image/png', 'image/webp'];
 
     /**
+     * @param  int|null  $maxSide  longest side to keep (default MAX_SIDE); menu icons and dish photos use smaller limits
      * @return string the stored path, for example "images/20261115_093000_..._villa.webp"
      */
-    public static function store(UploadedFile $file): string
+    public static function store(UploadedFile $file, ?int $maxSide = null): string
     {
         $name = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) ?: 'photo';
         $base = now()->format('Ymd_His').'_'.Str::uuid().'_'.$name;
 
-        $converted = self::convert($file, $base);
+        $converted = self::convert($file, $base, $maxSide ?? self::MAX_SIDE);
 
         if ($converted !== null) {
             return $converted;
@@ -51,7 +52,7 @@ class ImageUploader
         return extension_loaded('gd') && function_exists('imagewebp');
     }
 
-    private static function convert(UploadedFile $file, string $base): ?string
+    private static function convert(UploadedFile $file, string $base, int $maxSide): ?string
     {
         $mime = $file->getMimeType();
         $path = $file->getRealPath();
@@ -67,7 +68,7 @@ class ImageUploader
         }
 
         // A decoded picture needs about 4 bytes per pixel, and the shrunk copy exists at the same time.
-        $ratio = min(1, self::MAX_SIDE / max($size[0], $size[1]));
+        $ratio = min(1, $maxSide / max($size[0], $size[1]));
         $needed = (int) ((($size[0] * $size[1]) + ($size[0] * $size[1] * $ratio * $ratio)) * 4 * 1.3) + 8 * 1024 * 1024;
         $previousLimit = self::makeRoomFor($needed);
 
@@ -95,7 +96,7 @@ class ImageUploader
                 $source = self::turnUpright($source, $path);
             }
 
-            $source = self::shrink($source);
+            $source = self::shrink($source, $maxSide);
 
             imagealphablending($source, false);
             imagesavealpha($source, true);
@@ -184,17 +185,17 @@ class ImageUploader
         return imagerotate($image, $angle, 0) ?: $image;
     }
 
-    private static function shrink(\GdImage $image): \GdImage
+    private static function shrink(\GdImage $image, int $maxSide): \GdImage
     {
         $width = imagesx($image);
         $height = imagesy($image);
         $longest = max($width, $height);
 
-        if ($longest <= self::MAX_SIDE) {
+        if ($longest <= $maxSide) {
             return $image;
         }
 
-        $ratio = self::MAX_SIDE / $longest;
+        $ratio = $maxSide / $longest;
         $newWidth = max(1, (int) round($width * $ratio));
         $newHeight = max(1, (int) round($height * $ratio));
 
