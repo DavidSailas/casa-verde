@@ -1,0 +1,95 @@
+/* =========================================================
+   RESPONSIVE SAFETY LAYER
+   Loaded LAST on every public page (after rule.css), so it
+   only fills gaps the page stylesheets leave on real phones,
+   tablets, laptops and short / landscape windows. Nothing
+   here changes the desktop design on a normal-sized screen.
+========================================================= */
+
+/* ---------- 1. Base: stop phones from inflating or zooming text ---------- */
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+/* Taps respond at once (no double-tap-to-zoom delay) on links and buttons. */
+a, button, summary, label[for], [role="button"] {
+    touch-action: manipulation;
+}
+
+/* Embedded media can never be wider than the screen. */
+video, canvas, iframe, embed, object { max-width: 100%; }
+
+/* Long e-mail addresses and phone links wrap instead of pushing the page sideways (320px phones). */
+a[href^="mailto:"], a[href^="tel:"] { overflow-wrap: anywhere; }
+
+/* Form fields never overflow their column. iOS date/time inputs ignore width unless told otherwise. */
+input, select, textarea { max-width: 100%; }
+input[type="date"], input[type="time"], input[type="datetime-local"], input[type="month"] {
+    min-width: 0;
+    -webkit-appearance: none;
+    appearance: none;
+}
+textarea { resize: vertical; }
+
+
+/* ---------- 2. Phones & tablets: 16px form text ----------
+   iOS Safari zooms the whole page when a field smaller than 16px
+   gets focus (and does not zoom back). 16px prevents that. */
+@media (max-width: 900px) {
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="color"]):not([type="file"]),
+    select,
+    textarea {
+        font-size: 16px;
+    }
+}
+
+
+/* ---------- 3. Mobile browser toolbars ----------
+   100vh is taller than the visible screen on phones while the
+   address bar is showing, so the bottom of menus, lightboxes and
+   the hero slid out of view. dvh / svh follow the visible area. */
+@supports (height: 100dvh) {
+    @media (max-width: 1180px) {
+        /* Mobile menu: the last links and the Book button stay reachable. */
+        .nav-links {
+            max-height: calc(100dvh - var(--cv-header-h, 76px));
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+        }
+    }
+
+    /* Booking photo viewer: its bottom arrows sat under the toolbar. */
+    .bk-lightbox { height: 100dvh; }
+
+    /* Home hero fills the visible screen. */
+    .hero { min-height: 100svh; }
+}
+
+
+/* ---------- 4. Home: Long Stay sections never clip ----------
+   Both were a fixed % of the window height with overflow hidden,
+   so on 1366x768 laptops and tablets in landscape the title,
+   text and option cards were cut off. They keep the same look on
+   tall screens and simply grow when the window is short. */
+@media (min-width: 851px) {
+    .long-stay-section { height: max(69vh, 540px); }
+    .long-stay-options-section { height: auto; min-height: 33vh; }
+}
+
+
+/* ---------- 5. Very small phones (320 - 360px) ---------- */
+@media (max-width: 360px) {
+    .navbar { gap: 8px; }
+    .logo-text span { font-size: .56rem; letter-spacing: .06em; }
+    .nav-toggle { width: 42px; height: 42px; }
+    .nav-links { padding-left: 16px; padding-right: 16px; }
+}
+
+
+/* ---------- 6. Phones held sideways (short & wide) ----------
+   The hero text, buttons and features bar need more room than a
+   ~390px-tall screen offers, so the hero grows and the page scrolls. */
+@media (max-height: 500px) and (orientation: landscape) {
+    .hero { min-height: max(100svh, 560px); }
+}

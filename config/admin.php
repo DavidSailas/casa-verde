@@ -106,6 +106,23 @@ return [
             'hints' => ['image' => 'Square image, at least 200 x 200 px. Replace it here and the whole site follows.'],
             'hide' => ['description', 'icon', 'price', 'features', 'button_text', 'button_url'],
         ],
+        'site_seo' => [
+            'title' => 'Search and sharing',
+            'help' => 'How each page appears in Google and when it is shared on Facebook, WhatsApp or Messenger. One entry per page: keep the page name (first box) unchanged, because that is how the site finds it. The "Whole site" entry sets what every page falls back to: the name added after each title, the default description, the default share picture and your Google Analytics ID. On Winterresidenz and Journal, leave the title and description empty to use the page\'s own heading and text. Turn an entry OFF to go back to the built-in wording for that page.',
+            'fields' => [
+                'title' => 'Page name (do not change)',
+                'subtitle' => 'Title in the browser tab and Google (on "Whole site": the name added after every title)',
+                'description' => 'Description in Google results',
+                'image' => 'Picture shown when the page is shared',
+                'button_text' => 'Google Analytics ID (only on "Whole site")',
+            ],
+            'hints' => [
+                'description' => 'Aim for 120 to 160 characters: one clear sentence about what the visitor finds on the page.',
+                'image' => 'A landscape photo, at least 1200 x 630 px. Leave empty to use the "Whole site" picture.',
+                'button_text' => 'Looks like G-XXXXXXXXXX. Leave empty to switch statistics off. Statistics cookies may need a consent notice for visitors from some countries.',
+            ],
+            'hide' => ['icon', 'price', 'features', 'button_url'],
+        ],
         'features' => [
             'title' => 'Home page: icon strip under the banner',
             'help' => 'The six icons along the bottom of the Home banner, in order: cliff, sunsets, villas, ocean, wellness, restaurant. Upload an image (PNG or SVG) under Icon to replace one; clear it to go back to the original picture.',

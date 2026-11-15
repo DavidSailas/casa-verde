@@ -12,9 +12,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>
-        Our Villas | Casa Verde Cliff Resort & Spa
-    </title>
+    @include('layouts.seo', ['seoPage' => 'villas', 'seoTitle' => 'Our Villas'])
 
     @vite([
         'resources/js/villa-photos.js',
@@ -22,7 +20,7 @@
         'resources/css/villa.css',
         'resources/css/villa-gallery.css',
         'resources/css/theme.css',
-        'resources/css/footer.css','resources/css/rule.css',
+        'resources/css/footer.css','resources/css/rule.css', 'resources/css/responsive.css',
         'resources/js/app.js'
     ])
 

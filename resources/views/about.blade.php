@@ -5,8 +5,8 @@
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=20261017">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us | Casa Verde Cliff Resort &amp; Spa</title>
-    @vite(['resources/css/header.css', 'resources/css/pages.css', 'resources/css/about.css', 'resources/css/theme.css', 'resources/css/footer.css','resources/css/rule.css', 'resources/js/app.js'])
+    @include('layouts.seo', ['seoPage' => 'about-us', 'seoTitle' => 'About Us'])
+    @vite(['resources/css/header.css', 'resources/css/pages.css', 'resources/css/about.css', 'resources/css/theme.css', 'resources/css/footer.css','resources/css/rule.css', 'resources/css/responsive.css', 'resources/js/app.js'])
 </head>
 <body>
 @include('layouts.header')

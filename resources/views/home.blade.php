@@ -11,7 +11,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Casa Verde Cliff Resort & Spa</title>
+    @include('layouts.seo', ['seoPage' => 'home'])
 
     @vite([
         'resources/css/header.css',
@@ -22,7 +22,7 @@
         'resources/js/home-experiences.js',
         'resources/css/villa-gallery.css',
         'resources/js/villa-photos.js',
-        'resources/css/footer.css','resources/css/rule.css',
+        'resources/css/footer.css','resources/css/rule.css', 'resources/css/responsive.css',
         'resources/js/app.js'
     ])
 </head>

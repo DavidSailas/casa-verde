@@ -265,6 +265,11 @@ class HomeContent extends Model
                 app(\Database\Seeders\YogaContentSeeder::class)->run();
             }
 
+            // Search and sharing (page titles, descriptions, share pictures); load them once.
+            if (! static::where('section', 'site_seo')->exists()) {
+                app(\Database\Seeders\SiteSeoSeeder::class)->run();
+            }
+
             // Villa photo galleries: give every villa its starting photos once.
             static::fillVillaGalleries();
 

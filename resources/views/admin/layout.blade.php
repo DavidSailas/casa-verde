@@ -63,7 +63,7 @@
                     </span>
                 </summary>
 
-                <div class="max-h-[calc(100vh-3.5rem)] overflow-y-auto px-3 pb-5 pt-1">
+                <div class="max-h-[calc(100dvh-3.5rem)] overflow-y-auto px-3 pb-5 pt-1">
                     @include('admin.partials.nav')
 
                     <div class="mt-4 border-t border-white/10 pt-3">

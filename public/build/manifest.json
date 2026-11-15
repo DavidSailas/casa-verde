@@ -9,7 +9,7 @@
     "isEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-B9Wn6WCe.css",
+    "file": "assets/app-CGHMZ2BQ.css",
     "name": "app",
     "names": [
       "app.css"
@@ -150,6 +150,15 @@
       "pages.css"
     ],
     "src": "resources/css/pages.css",
+    "isEntry": true
+  },
+  "resources/css/responsive.css": {
+    "file": "assets/responsive-ClORXhQ6.css",
+    "name": "responsive",
+    "names": [
+      "responsive.css"
+    ],
+    "src": "resources/css/responsive.css",
     "isEntry": true
   },
   "resources/css/reviews.css": {

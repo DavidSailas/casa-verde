@@ -12,13 +12,13 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Experiences | Casa Verde Cliff Resort & Spa</title>
+    @include('layouts.seo', ['seoPage' => 'experiences', 'seoTitle' => 'Experiences'])
 
     @vite([
         'resources/css/header.css',
         'resources/css/experience.css',
         'resources/css/theme.css',
-        'resources/css/footer.css','resources/css/rule.css',
+        'resources/css/footer.css','resources/css/rule.css', 'resources/css/responsive.css',
         'resources/js/app.js'
     ])
 

@@ -6,14 +6,13 @@
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=20261017">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book your stay | Casa Verde Cliff Resort &amp; Spa</title>
-    <meta name="description" content="Choose your villa, pick your dates and send your booking request to Casa Verde Cliff Resort &amp; Spa.">
+    @include('layouts.seo', ['seoPage' => 'book-your-stay', 'seoTitle' => 'Book your stay', 'seoDescription' => 'Choose your villa, pick your dates and send your booking request to Casa Verde Cliff Resort & Spa.'])
 
     @vite([
         'resources/css/header.css',
         'resources/css/book.css',
         'resources/css/theme.css',
-        'resources/css/footer.css', 'resources/css/rule.css',
+        'resources/css/footer.css', 'resources/css/rule.css', 'resources/css/responsive.css',
         'resources/js/app.js',
         'resources/js/book.js',
     ])

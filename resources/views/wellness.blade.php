@@ -12,13 +12,13 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Wellness | Casa Verde Cliff Resort & Spa</title>
+    @include('layouts.seo', ['seoPage' => 'wellness', 'seoTitle' => 'Wellness'])
 
     @vite([
         'resources/css/header.css',
         'resources/css/wellness.css',
         'resources/css/theme.css',
-        'resources/css/footer.css','resources/css/rule.css',
+        'resources/css/footer.css','resources/css/rule.css', 'resources/css/responsive.css',
         'resources/js/app.js'
     ])
 

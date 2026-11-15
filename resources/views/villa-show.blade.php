@@ -9,15 +9,13 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{{ $villa->title }} | Casa Verde Cliff Resort &amp; Spa</title>
-
-    <meta name="description" content="{{ \Illuminate\Support\Str::limit($intro, 155) }}">
+    @include('layouts.seo', ['seoPage' => '', 'seoTitle' => $villa->title, 'seoDescription' => \Illuminate\Support\Str::limit($intro, 155), 'seoImage' => $heroImage ?? null])
 
     @vite([
         'resources/css/header.css',
         'resources/css/villa-show.css',
         'resources/css/theme.css',
-        'resources/css/footer.css','resources/css/rule.css',
+        'resources/css/footer.css','resources/css/rule.css', 'resources/css/responsive.css',
         'resources/js/app.js'
     ])
 

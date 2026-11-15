@@ -5,13 +5,13 @@
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=20261017">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Long Stay | Casa Verde Cliff Resort &amp; Spa</title>
+    @include('layouts.seo', ['seoPage' => 'long-stay', 'seoTitle' => 'Long Stay'])
     @vite([
         'resources/css/header.css',
         'resources/css/pages.css',
         'resources/css/longstay.css',
         'resources/css/theme.css',
-        'resources/css/footer.css','resources/css/rule.css',
+        'resources/css/footer.css','resources/css/rule.css', 'resources/css/responsive.css',
         'resources/js/app.js'
     ])
 </head>

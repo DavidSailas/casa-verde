@@ -6,12 +6,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex">
-    <title>Request received | Casa Verde Cliff Resort &amp; Spa</title>
+    @include('layouts.seo', ['seoPage' => '', 'seoTitle' => 'Request received', 'seoNoindex' => true])
     @vite([
         'resources/css/header.css',
         'resources/css/book.css',
         'resources/css/theme.css',
-        'resources/css/footer.css', 'resources/css/rule.css',
+        'resources/css/footer.css', 'resources/css/rule.css', 'resources/css/responsive.css',
         'resources/js/app.js',
     ])
 </head>

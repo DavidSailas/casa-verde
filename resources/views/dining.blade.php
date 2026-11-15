@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Dining | Casa Verde Cliff Resort & Spa</title>
+    @include('layouts.seo', ['seoPage' => 'dining', 'seoTitle' => 'Dining'])
 
     @vite([
         'resources/css/header.css',
@@ -16,7 +16,7 @@
         'resources/css/drinksmenu.css',
         'resources/js/drinksmenu.js',
         'resources/css/theme.css',
-        'resources/css/footer.css','resources/css/rule.css',
+        'resources/css/footer.css','resources/css/rule.css', 'resources/css/responsive.css',
         'resources/js/app.js'
     ])
 

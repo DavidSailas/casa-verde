@@ -5,8 +5,8 @@
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=20261017">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Special Offers | Casa Verde Cliff Resort &amp; Spa</title>
-    @vite(['resources/css/header.css','resources/css/pages.css','resources/css/theme.css','resources/css/footer.css','resources/css/rule.css','resources/js/app.js'])
+    @include('layouts.seo', ['seoPage' => 'special-offers', 'seoTitle' => 'Special Offers'])
+    @vite(['resources/css/header.css','resources/css/pages.css','resources/css/theme.css','resources/css/footer.css','resources/css/rule.css', 'resources/css/responsive.css','resources/js/app.js'])
     <style>
       .cv-offers-page{background:#f8f5ef;color:#09241e;min-height:70vh}
       .cv-offers-page .cv-offers-section{max-width:1500px;margin:0 auto;padding:25px clamp(20px,3.3vw,52px) 56px}

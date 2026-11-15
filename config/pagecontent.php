@@ -642,4 +642,35 @@ to your comfort and care.',
             'description' => 'Online booking is paused right now. Please contact us and our team will gladly arrange your stay.',
         ],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Search & sharing (Site-wide > Search and sharing)
+    |--------------------------------------------------------------------------
+    | One entry per page, found by its name. "subtitle" is the title shown in the browser tab and in
+    | Google, "description" the text under it in search results, "image" the picture shown when the
+    | page is shared. Leave "subtitle" or "description" empty on the pages marked below to keep
+    | the page's own heading and text. The "Whole site" entry supplies what every page falls back
+    | to: the name added after each title (subtitle), the default description, the default share
+    | picture and the Google Analytics ID (button_text).
+    */
+    'site_seo' => [
+        ['title' => 'Whole site', 'subtitle' => 'Casa Verde Cliff Resort & Spa', 'description' => 'Casa Verde Cliff Resort & Spa on Camotes Island: cliffside villas, wellness, dining, yoga retreats and long stays.', 'button_text' => ''],
+        ['title' => 'Home', 'subtitle' => '', 'description' => 'Casa Verde Cliff Resort & Spa on Camotes Island: cliffside villas, wellness, dining, yoga retreats and long stays.'],
+        ['title' => 'Villas', 'subtitle' => 'Our Villas', 'description' => 'Choose your private cliffside villa at Casa Verde Cliff Resort & Spa on Camotes Island, with a terrace, comfortable beds and daily housekeeping.'],
+        ['title' => 'Experiences', 'subtitle' => 'Experiences', 'description' => 'Discover island experiences from Casa Verde Cliff Resort & Spa: sunsets, caves, beaches and local adventures on Camotes Island.'],
+        ['title' => 'Wellness', 'subtitle' => 'Wellness', 'description' => 'Spa treatments, massages and wellness rituals at Casa Verde Cliff Resort & Spa on Camotes Island.'],
+        ['title' => 'Dining', 'subtitle' => 'Dining', 'description' => 'Dine at Casa Verde Cliff Resort & Spa: breakfast, fresh seafood, Asian and Western dishes, and drinks with a sunset view.'],
+        ['title' => 'Long Stay', 'subtitle' => 'Long Stay', 'description' => 'Long stay villas at Casa Verde Cliff Resort & Spa on Camotes Island, for guests who want to settle in and stay longer.'],
+        ['title' => 'Winterresidenz', 'subtitle' => '', 'description' => ''],
+        ['title' => 'Events', 'subtitle' => 'Events', 'description' => 'Weddings, celebrations and private events at Casa Verde Cliff Resort & Spa on Camotes Island.'],
+        ['title' => 'Reviews', 'subtitle' => 'Reviews', 'description' => 'Read what guests say about their stay at Casa Verde Cliff Resort & Spa.'],
+        ['title' => 'Journal', 'subtitle' => '', 'description' => ''],
+        ['title' => 'Yoga Reset', 'subtitle' => 'Yoga Reset', 'description' => 'Yoga Reset retreats at Casa Verde Cliff Resort & Spa: classes, wellness and time to restore on Camotes Island.'],
+        ['title' => 'Gallery', 'subtitle' => 'Gallery', 'description' => 'Photos of the villas, dining, spa and views at Casa Verde Cliff Resort & Spa.'],
+        ['title' => 'Special Offers', 'subtitle' => 'Special Offers', 'description' => 'Current special offers and promotions for your stay at Casa Verde Cliff Resort & Spa.'],
+        ['title' => 'About Us', 'subtitle' => 'About Us', 'description' => 'About Casa Verde Cliff Resort & Spa: our story, our values and our home on Camotes Island.'],
+        ['title' => 'Contact Us', 'subtitle' => 'Contact Us', 'description' => 'Contact Casa Verde Cliff Resort & Spa on Camotes Island: send us a message, find us on the map or call our team.'],
+        ['title' => 'Book your stay', 'subtitle' => 'Book your stay', 'description' => 'Choose your villa, pick your dates and send your booking request to Casa Verde Cliff Resort & Spa.'],
+    ],
 ];

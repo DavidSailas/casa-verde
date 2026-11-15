@@ -5,13 +5,12 @@
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=20261017">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title }} | Casa Verde Cliff Resort &amp; Spa</title>
-    <meta name="description" content="{{ $text }}">
+    @include('layouts.seo', ['seoPage' => 'journal', 'seoTitle' => $title, 'seoDescription' => $text])
     @vite([
         'resources/css/header.css',
         'resources/css/pages.css',
         'resources/css/theme.css',
-        'resources/css/footer.css','resources/css/rule.css',
+        'resources/css/footer.css','resources/css/rule.css', 'resources/css/responsive.css',
         'resources/js/app.js'
     ])
     @include('journal._style')
