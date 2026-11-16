@@ -118,6 +118,16 @@
         html:not([lang="en"]) :is(h1, h2, h3) { letter-spacing: .02em; }
         html:not([lang="en"]) :is(button, [class*="button"], [class*="btn"]) { white-space: normal; }
 
+        /* Korean, Chinese and Japanese: words stay whole (Korean uses spaces), and the wide letter spacing meant for
+           Latin capitals is switched off, so headings, buttons and cards keep their shape */
+        html:is([lang="ko"], [lang="ja"], [lang^="zh"]) body { line-height: 1.65; }
+        html[lang="ko"] body { word-break: keep-all; overflow-wrap: break-word; }
+        html:is([lang="ja"], [lang^="zh"]) body { line-break: strict; }
+        html:is([lang="ko"], [lang="ja"], [lang^="zh"]) body :not(.cv-lang, .cv-lang *) { letter-spacing: normal !important; }
+        html:is([lang="ko"], [lang="ja"], [lang^="zh"]) :is(h1, h2, h3, h4) { line-height: 1.3; }
+        html.cv-translating body { opacity: 0; }
+        html:not([lang="en"]) body { transition: opacity .35s ease; }
+        @media (prefers-reduced-motion: reduce) { html:not([lang="en"]) body { transition: none; } }
         /* Hide Google's own banner and highlights: our menu is the only control */
         body { top: 0 !important; }
         body > .skiptranslate, iframe.skiptranslate, .goog-te-banner-frame,
@@ -140,10 +150,22 @@
             function set(name, value, days) {
                 document.cookie = name + '=' + encodeURIComponent(value) + '; path=/; max-age=' + days * 86400 + '; SameSite=Lax' + secure;
             }
+            // The translator saves its cookie on the whole domain (for casa.example.com that is example.com too).
+            // An old copy there beats the new one, so a language change was ignored (Korean stayed English).
+            // Clear the cookie on the host and on every parent domain.
+            function domains() {
+                var parts = host.split('.');
+                var list = [host, '.' + host];
+                for (var i = 1; i < parts.length - 1; i++) {
+                    var d = parts.slice(i).join('.');
+                    list.push(d, '.' + d);
+                }
+                return list;
+            }
             function drop(name) {
-                document.cookie = name + '=; path=/; max-age=0';
-                document.cookie = name + '=; path=/; max-age=0; domain=' + host;
-                document.cookie = name + '=; path=/; max-age=0; domain=.' + host;
+                var gone = '=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                document.cookie = name + gone;
+                domains().forEach(function (d) { document.cookie = name + gone + '; domain=' + d; });
             }
 
             // Which language is this visitor reading? Their own choice, else the automatic one, else English.
@@ -159,15 +181,38 @@
             }
 
             document.documentElement.lang = target === 'en' ? 'en' : target;
-
+            // After choosing a language the page used to show English for a moment and then jump when the
+            // translation arrived. It is now held back (invisible, but laid out) until the translation is in
+            // place, with a safety timeout so the page can never stay blank.
+            if (target !== 'en') {
+                var root0 = document.documentElement;
+                root0.classList.add('cv-translating');
+                var reveal = function () {
+                    if (!root0.classList.contains('cv-translating')) return;
+                    try { fitNav(); fitText(); } catch (e) { /* never let fitting break the page */ }
+                    root0.classList.remove('cv-translating');
+                };
+                setTimeout(reveal, 4500);
+                if ('MutationObserver' in window) {
+                    var watch = new MutationObserver(function () {
+                        if (/translated-(ltr|rtl)/.test(root0.className)) {
+                            watch.disconnect();
+                            setTimeout(reveal, 250);   // a moment for the new text to settle and be fitted
+                        }
+                    });
+                    watch.observe(root0, { attributes: true, attributeFilter: ['class'] });
+                }
+            }
             // Let the translator know, then load it (only when not English).
             if (target === 'en') {
                 drop('googtrans');
             } else {
                 // The translator keeps its own copy of this cookie on the whole domain. Two cookies with the same
                 // name can disagree (the old language wins), so clear every copy before setting the new one.
-                drop('googtrans');
-                document.cookie = 'googtrans=/en/' + target + '; path=/; max-age=' + 180 * 86400 + '; SameSite=Lax' + secure;
+                if (get('googtrans') !== '/en/' + target) {
+                    drop('googtrans');
+                    document.cookie = 'googtrans=/en/' + target + '; path=/; max-age=' + 180 * 86400 + '; SameSite=Lax' + secure;
+                }
 
                 // Google's translator wraps text in <font> tags. A script that later removes or inserts around the
                 // old text node then throws ("not a child of this node") and stops working. Ignore those stale calls.
@@ -178,12 +223,49 @@
                     Node.prototype.__cvSafe = true;
                 }
 
+                function isTranslated() {
+                    var done = /translated-(ltr|rtl)/.test(document.documentElement.className);
+                    if (done) { try { sessionStorage.removeItem('cv_retry:' + location.pathname); } catch (e) { /* storage blocked */ } }
+                    return done;
+                }
+                // A refresh fixes a page that stayed English, so do that once, automatically, while the page is
+                // still hidden (see cv-translating). The flag stops it from ever reloading in a loop.
+                setTimeout(function () {
+                    if (isTranslated()) return;
+                    try {
+                        var key = 'cv_retry:' + location.pathname;
+                        if (sessionStorage.getItem(key)) return;
+                        sessionStorage.setItem(key, '1');
+                        location.reload();
+                    } catch (e) { /* storage blocked: leave the page as it is */ }
+                }, 3800);
+                // Coming back with the browser's Back button can show an old copy of the page: check it again
+                window.addEventListener('pageshow', function (e) {
+                    if (e.persisted && !isTranslated()) location.reload();
+                });
                 window.googleTranslateElementInit = function () {
                     new google.translate.TranslateElement({
                         pageLanguage: 'en',
                         includedLanguages: cfg.google,
                         autoDisplay: false
                     }, 'google_translate_element');
+                    // Normally the cookie starts the translation. When it does not (it sometimes fails on the page
+                    // after a language was chosen), pick the language in the translator's own hidden language box,
+                    // and try again a few times: the box only works once its list of languages has loaded.
+                    var tries = 0, kicks = 0;
+                    var poll = setInterval(function () {
+                        tries++;
+                        if (isTranslated() || tries > 60) {
+                            clearInterval(poll);
+                            return;
+                        }
+                        var combo = document.querySelector('select.goog-te-combo');
+                        if (combo && combo.options.length > 1 && tries >= 3 && tries % 2 === 1 && kicks < 5) {
+                            kicks++;
+                            combo.value = target;
+                            combo.dispatchEvent(new Event('change'));
+                        }
+                    }, 500);
                 };
 
                 var s = document.createElement('script');

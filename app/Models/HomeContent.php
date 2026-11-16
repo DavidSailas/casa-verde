@@ -123,6 +123,26 @@ class HomeContent extends Model
     }
 
     /**
+     * The resort name and logo from "Site-wide > Logo and resort name". The food and drinks menus show these
+     * in their footer and header, so changing the logo or the name once changes it everywhere.
+     *
+     * @return array{name: string, logo: string}
+     */
+    public static function siteBrand(): array
+    {
+        try {
+            $name = trim((string) static::where('section', 'site')->where('active', true)->orderBy('sort_order')->value('title'));
+        } catch (\Throwable) {
+            $name = '';
+        }
+
+        return [
+            'name' => $name !== '' ? $name : 'Casa Verde Cliff Resort & Spa',
+            'logo' => static::siteLogo(),
+        ];
+    }
+
+    /**
      * An icon the admin has replaced with an uploaded image, as opposed to a built-in
      * placeholder or an icon name. Returns null while the original design should show.
      */

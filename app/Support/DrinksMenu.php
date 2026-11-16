@@ -103,8 +103,8 @@ class DrinksMenu
 
         return [
             'title' => static::text($settings?->title, 'Drinks Menu'),
-            'brand' => static::text($settings?->subtitle, 'Casa Verde Cliff Resort & Spa'),
-            'logo' => trim((string) $settings?->icon),
+            'brand' => HomeContent::siteBrand()['name'],
+            'logo' => HomeContent::siteBrand()['logo'],
             'currency' => static::text($settings?->button_text, 'PHP'),
             'note' => static::text($settings?->description, ''),
             'filters' => $filters,

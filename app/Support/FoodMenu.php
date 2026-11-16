@@ -99,9 +99,11 @@ class FoodMenu
 
         $icons = static::icons($contents);
         $cover = HomeContent::pageRow($contents, 'dining_page_food_menu');
+        // Name and logo follow Site-wide > "Logo and resort name", the same as the header and footer.
+        $site = HomeContent::siteBrand();
         $brand = [
-            'text' => filled($cover?->subtitle) ? trim((string) $cover->subtitle) : 'Casa Verde Cliff Resort & Spa',
-            'icon' => trim((string) $cover?->icon),
+            'text' => $site['name'],
+            'icon' => $site['logo'],
         ];
 
         $sizes = MenuSizes::foodStyle($cover);
