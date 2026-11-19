@@ -98,6 +98,15 @@
     "src": "resources/css/header.css",
     "isEntry": true
   },
+  "resources/css/home-contact.css": {
+    "file": "assets/home-contact-8jOHzUgI.css",
+    "name": "home-contact",
+    "names": [
+      "home-contact.css"
+    ],
+    "src": "resources/css/home-contact.css",
+    "isEntry": true
+  },
   "resources/css/home-experiences.css": {
     "file": "assets/home-experiences-Cvs16n1j.css",
     "name": "home-experiences",

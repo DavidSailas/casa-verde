@@ -14,6 +14,7 @@ export default defineConfig({
                 'resources/css/home-video.css',
                 'resources/js/home-video.js',
                 'resources/css/home-villas.css',
+                'resources/css/home-contact.css',
                 'resources/css/home-experiences.css',
                 'resources/js/home-experiences.js',
                 'resources/css/villa.css',

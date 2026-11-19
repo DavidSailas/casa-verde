@@ -160,6 +160,288 @@
     </a>
 
 </header>
+
+@php
+    // ---- Phone navigation: a bottom tab bar (Home, two main pages, Book, More). Same admin menu as the top menu. ----
+    $tabIcons = [
+        'home' => '<path d="M3.5 11.2 12 4l8.5 7.2"/><path d="M5.8 9.8V20h12.4V9.8"/><path d="M10 20v-5.2h4V20"/>',
+        'villas' => '<path d="M3.5 19V6"/><path d="M3.5 14h17a1 1 0 0 1 1 1v4"/><path d="M3.5 17h18"/><circle cx="7.5" cy="10.6" r="1.6"/><path d="M11 12.5V10h6a3.5 3.5 0 0 1 3.5 3.5V14"/>',
+        'dining' => '<path d="M7 3v6.2a2.2 2.2 0 0 0 2.2 2.2H10V21"/><path d="M7 3v4.5M12.8 3v4.5a2.2 2.2 0 0 1-2.2 2.2"/><path d="M17.5 21V3c-2.2 1.4-3.3 4-3.3 7 0 2 1 3 3.3 3"/>',
+        'wellness' => '<path d="M12 20.5c-4.2-1.8-7-5.2-7-9.5 3.8 0 7 2.4 7 5.8 0-3.4 3.2-5.8 7-5.8 0 4.3-2.8 7.7-7 9.5Z"/><path d="M12 16.8V6"/>',
+        'experiences' => '<path d="m12 3.4 2.6 5.5 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6-4.4-4.2 6-.8Z"/>',
+        'book' => '<rect x="4.5" y="5.5" width="15" height="14" rx="2.2"/><path d="M4.5 10h15M9 3.5v4M15 3.5v4"/>',
+        'more' => '<rect x="4.5" y="4.5" width="6" height="6" rx="1.6"/><rect x="13.5" y="4.5" width="6" height="6" rx="1.6"/><rect x="4.5" y="13.5" width="6" height="6" rx="1.6"/><rect x="13.5" y="13.5" width="6" height="6" rx="1.6"/>',
+        'close' => '<path d="M6 6l12 12M18 6 6 18"/>',
+    ];
+    $tabSvg = fn (string $key) => '<svg class="cv-tab__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'.($tabIcons[$key] ?? $tabIcons['experiences']).'</svg>';
+
+    $tabRows = collect(['villas', 'dining', 'experiences', 'wellness'])
+        ->map(fn ($want) => $navRows->first(fn ($n) => strtolower(trim($n->title)) === $want))
+        ->filter()
+        ->take(2)
+        ->values();
+
+    $tabActiveAny = request()->is('/') || request()->routeIs('booking.*')
+        || $tabRows->contains(fn ($n) => $resolveNav($n)[1]);
+
+    // Everything in the "More" sheet, grouped like the dropdowns in the top menu.
+    $moreItems = [];
+
+    foreach ($navRows as $nav) {
+        $slug = strtolower(trim($nav->title));
+
+        if ($groupFirst !== null && in_array($slug, $navGroup['slugs'], true)) {
+            if ($nav->id === $groupFirst) {
+                $moreItems[] = [
+                    'label' => $navGroup['label'],
+                    'children' => $groupRows->map(function ($row) use ($resolveNav) {
+                        [$gHref, $gActive] = $resolveNav($row);
+
+                        return ['title' => $row->title, 'href' => $gHref, 'active' => $gActive];
+                    })->all(),
+                ];
+            }
+
+            continue;
+        }
+
+        if (isset($subNav[$slug])) {
+            $moreItems[] = [
+                'label' => $nav->title,
+                'children' => collect($subNav[$slug])->map(fn ($sub, $i) => [
+                    'title' => $i === 0 ? $nav->title : $sub['title'],
+                    'href' => $sub['href'],
+                    'active' => $sub['active'],
+                ])->values()->all(),
+            ];
+
+            continue;
+        }
+
+        [$mHref, $mActive] = $resolveNav($nav);
+        $moreItems[] = ['title' => $nav->title, 'href' => $mHref, 'active' => $mActive];
+    }
+@endphp
+
+<nav class="cv-tabbar" aria-label="Main" style="--cv-tabs: {{ 3 + $tabRows->count() }}">
+
+    <a href="{{ url('/') }}" @class(['cv-tab', 'is-active' => request()->is('/')]) @if(request()->is('/')) aria-current="page" @endif>
+        {!! $tabSvg('home') !!}
+        <span>Home</span>
+    </a>
+
+    @foreach($tabRows->take(1) as $row)
+        @php [$tHref, $tActive] = $resolveNav($row); @endphp
+        <a href="{{ $tHref }}" @class(['cv-tab', 'is-active' => $tActive]) @if($tActive) aria-current="page" @endif>
+            {!! $tabSvg(strtolower(trim($row->title))) !!}
+            <span>{{ $row->title }}</span>
+        </a>
+    @endforeach
+
+    <a href="{{ route('booking.index') }}" @class(['cv-tab', 'cv-tab--book', 'is-active' => request()->routeIs('booking.*')]) @if(request()->routeIs('booking.*')) aria-current="page" @endif>
+        <span class="cv-tab__disc">{!! $tabSvg('book') !!}</span>
+        <span>Book</span>
+    </a>
+
+    @foreach($tabRows->slice(1) as $row)
+        @php [$tHref, $tActive] = $resolveNav($row); @endphp
+        <a href="{{ $tHref }}" @class(['cv-tab', 'is-active' => $tActive]) @if($tActive) aria-current="page" @endif>
+            {!! $tabSvg(strtolower(trim($row->title))) !!}
+            <span>{{ $row->title }}</span>
+        </a>
+    @endforeach
+
+    <button type="button" @class(['cv-tab', 'is-active' => ! $tabActiveAny]) aria-haspopup="dialog" aria-expanded="false" aria-controls="cv-more" data-cv-more-open>
+        {!! $tabSvg('more') !!}
+        <span>More</span>
+    </button>
+
+</nav>
+
+<div class="cv-more" id="cv-more" data-cv-more>
+    <div class="cv-more__backdrop" data-cv-more-close></div>
+
+    <div class="cv-more__panel" role="dialog" aria-modal="true" aria-label="Menu">
+        <div class="cv-more__head">
+            <span>Menu</span>
+            <button type="button" class="cv-more__close" data-cv-more-close aria-label="Close menu">{!! $tabSvg('close') !!}</button>
+        </div>
+
+        <nav class="cv-more__list" aria-label="All pages">
+            @foreach($moreItems as $item)
+                @if(isset($item['children']))
+                    <p class="cv-more__group">{{ $item['label'] }}</p>
+                    @foreach($item['children'] as $child)
+                        <a href="{{ $child['href'] }}" @class(['cv-more__link', 'cv-more__link--child', 'is-active' => $child['active']]) @if($child['active']) aria-current="page" @endif>{{ $child['title'] }}</a>
+                    @endforeach
+                @else
+                    <a href="{{ $item['href'] }}" @class(['cv-more__link', 'is-active' => $item['active']]) @if($item['active']) aria-current="page" @endif>{{ $item['title'] }}</a>
+                @endif
+            @endforeach
+        </nav>
+
+        <a href="{{ route('booking.index') }}" class="cv-more__book">Book your stay</a>
+    </div>
+</div>
+
+<style id="cv-tabbar-css">
+.cv-tabbar, .cv-more { display: none; }
+
+@media (max-width: 767px) {
+    :root { --cv-tab-h: 66px; }
+
+    /* The hamburger and its dropdown give way to the bottom bar */
+    header.navbar .nav-toggle, header.navbar .nav-links, header.navbar .nav-book-desktop { display: none !important; }
+    body { padding-bottom: calc(var(--cv-tab-h) + env(safe-area-inset-bottom, 0px)); }
+
+    /* ---------- Bottom tab bar ---------- */
+    .cv-tabbar {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 950;
+        display: grid; grid-template-columns: repeat(var(--cv-tabs, 5), minmax(0, 1fr)); align-items: end;
+        min-height: var(--cv-tab-h);
+        padding: 0 4px env(safe-area-inset-bottom, 0px);
+        background: rgba(4, 32, 26, .96);
+        -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+        border-top: 1px solid rgba(216, 180, 130, .28);
+        box-shadow: 0 -16px 32px -20px rgba(0, 0, 0, .7);
+        view-transition-name: cv-tabbar;
+    }
+
+    .cv-tab {
+        position: relative;
+        display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 5px;
+        min-width: 0; height: var(--cv-tab-h); padding: 0 2px 9px;
+        border: 0; background: none; cursor: pointer;
+        color: rgba(246, 234, 214, .66); text-decoration: none;
+        font: 600 .62rem/1.1 var(--cv-sans, system-ui, sans-serif); letter-spacing: .08em; text-transform: uppercase;
+        -webkit-tap-highlight-color: transparent;
+        transition: color .2s;
+    }
+    .cv-tab > span:last-child { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cv-tab__icon { width: 23px; height: 23px; flex: none; transition: transform .25s cubic-bezier(.22, 1, .36, 1); }
+    .cv-tab:active .cv-tab__icon { transform: scale(.88); }
+
+    .cv-tab.is-active { color: #f1cf9c; }
+    .cv-tab.is-active::before {
+        content: ""; position: absolute; top: 0; left: 50%; width: 28px; height: 3px; margin-left: -14px;
+        border-radius: 0 0 4px 4px; background: linear-gradient(90deg, #b98b55, #f0cc8e, #b98b55);
+    }
+    .cv-tab:focus-visible { outline: 2px solid #f1cf9c; outline-offset: -4px; border-radius: 12px; }
+
+    /* Book: a raised gold button in the middle */
+    .cv-tab--book { color: #f1cf9c; }
+    .cv-tab--book.is-active::before { display: none; }
+    .cv-tab__disc {
+        display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: -1px; margin-top: -24px;
+        border-radius: 50%; color: #1a1208;
+        background: linear-gradient(180deg, #ecbd7e 0%, #d49b5c 100%);
+        box-shadow: 0 0 0 5px #04201a, 0 12px 22px -8px rgba(217, 163, 102, .85), inset 0 1px 0 rgba(255, 255, 255, .45);
+        transition: transform .25s cubic-bezier(.22, 1, .36, 1);
+    }
+    .cv-tab--book:active .cv-tab__disc { transform: scale(.94); }
+    .cv-tab--book .cv-tab__icon { width: 24px; height: 24px; }
+
+    /* Things that sat at the bottom of the screen move up above the bar */
+    .cvw-chat:not(.is-open) { bottom: calc(var(--cv-tab-h) + 14px + env(safe-area-inset-bottom, 0px)); }
+    .ybk-bar { bottom: calc(var(--cv-tab-h) + env(safe-area-inset-bottom, 0px)); padding-bottom: 12px; }
+
+    /* ---------- "More" sheet ---------- */
+    .cv-more { position: fixed; inset: 0; z-index: 1100; display: none; }
+    .cv-more.is-open { display: block; }
+    html.cv-more-lock { overflow: hidden; }
+
+    .cv-more__backdrop { position: absolute; inset: 0; background: rgba(2, 14, 11, .62); animation: cv-more-fade .25s ease both; }
+    .cv-more__panel {
+        position: absolute; left: 0; right: 0; bottom: 0; max-height: 86dvh; overflow-y: auto; overscroll-behavior: contain;
+        padding: 8px 22px calc(22px + env(safe-area-inset-bottom, 0px));
+        background: linear-gradient(180deg, #06271f, #04201a);
+        border: 1px solid rgba(216, 180, 130, .25); border-bottom: 0; border-radius: 24px 24px 0 0;
+        box-shadow: 0 -30px 60px -20px rgba(0, 0, 0, .8);
+        animation: cv-more-up .38s cubic-bezier(.22, 1, .36, 1) both;
+    }
+    .cv-more__panel::before { content: ""; display: block; width: 44px; height: 4px; margin: 4px auto 6px; border-radius: 4px; background: rgba(216, 180, 130, .4); }
+
+    .cv-more__head { display: flex; align-items: center; justify-content: space-between; padding: 6px 0 10px; }
+    .cv-more__head span { font: 600 1.35rem var(--cv-serif, Georgia, serif); letter-spacing: .06em; text-transform: uppercase; color: #f6ead6; }
+    .cv-more__close {
+        display: grid; place-items: center; width: 42px; height: 42px; padding: 0;
+        border: 1px solid rgba(216, 180, 130, .5); border-radius: 50%; background: transparent; color: #e6c28f; cursor: pointer;
+    }
+    .cv-more__close .cv-tab__icon { width: 18px; height: 18px; }
+    .cv-more__close:focus-visible { outline: 2px solid #f1cf9c; outline-offset: 2px; }
+
+    .cv-more__group { margin: 18px 0 2px; font: 700 .68rem var(--cv-sans, system-ui, sans-serif); letter-spacing: .2em; text-transform: uppercase; color: #b98b55; }
+    .cv-more__link {
+        display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 54px;
+        border-bottom: 1px solid rgba(216, 180, 130, .16);
+        font: 600 .92rem var(--cv-sans, system-ui, sans-serif); letter-spacing: .1em; text-transform: uppercase;
+        color: rgba(246, 234, 214, .92); text-decoration: none;
+    }
+    .cv-more__link::after {
+        content: ""; flex: none; width: 8px; height: 8px; border-top: 2px solid currentColor; border-right: 2px solid currentColor;
+        transform: rotate(45deg); opacity: .45;
+    }
+    .cv-more__link--child { padding-left: 14px; border-left: 1px solid rgba(216, 180, 130, .4); font-size: .86rem; }
+    .cv-more__link.is-active { color: #f1cf9c; }
+    .cv-more__link.is-active::after { opacity: 1; }
+    .cv-more__link:focus-visible { outline: 2px solid #f1cf9c; outline-offset: 2px; border-radius: 6px; }
+
+    .cv-more__book {
+        display: flex; align-items: center; justify-content: center; min-height: 52px; margin-top: 22px; border-radius: 999px;
+        background: linear-gradient(180deg, #e8b878 0%, #d49b5c 100%); color: #1a1208; text-decoration: none;
+        font: 700 .8rem var(--cv-sans, system-ui, sans-serif); letter-spacing: .14em; text-transform: uppercase;
+        box-shadow: 0 12px 26px -14px rgba(217, 163, 102, .9);
+    }
+
+    @keyframes cv-more-fade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes cv-more-up { from { transform: translateY(100%); } to { transform: none; } }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cv-tab, .cv-tab__icon, .cv-tab__disc, .cv-more__backdrop, .cv-more__panel { animation: none !important; transition: none !important; }
+}
+</style>
+
+<script>
+// Phone bottom bar: the "More" button opens the full menu as a sheet; it closes on a tap outside, on Escape, on a link.
+(function () {
+    var sheet = document.querySelector('[data-cv-more]');
+    var opener = document.querySelector('[data-cv-more-open]');
+    if (!sheet || !opener) return;
+
+    function set(open, restoreFocus) {
+        sheet.classList.toggle('is-open', open);
+        opener.setAttribute('aria-expanded', String(open));
+        document.documentElement.classList.toggle('cv-more-lock', open);
+
+        if (open) {
+            var close = sheet.querySelector('.cv-more__close');
+            if (close) close.focus({ preventScroll: true });
+        } else if (restoreFocus) {
+            opener.focus({ preventScroll: true });
+        }
+    }
+
+    opener.addEventListener('click', function () { set(!sheet.classList.contains('is-open'), false); });
+
+    sheet.addEventListener('click', function (e) {
+        if (e.target.closest('[data-cv-more-close]')) { set(false, true); return; }
+        if (e.target.closest('a[href]')) set(false, false);
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && sheet.classList.contains('is-open')) set(false, true);
+    });
+
+    window.addEventListener('pageshow', function () { set(false, false); });
+
+    if (window.matchMedia) {
+        var wide = window.matchMedia('(min-width: 768px)');
+        var onChange = function (e) { if (e.matches) set(false, false); };
+        if (wide.addEventListener) wide.addEventListener('change', onChange); else if (wide.addListener) wide.addListener(onChange);
+    }
+})();
+</script>
 <script>window.cvFitNav && window.cvFitNav();</script>
 <style>
 /* A short, even fade between pages (browsers without cross-page transitions just load the page as usual).

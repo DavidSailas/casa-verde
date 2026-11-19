@@ -3,12 +3,14 @@
 namespace App\Support;
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
- * Saves an uploaded picture in public/images. Photos and icons (JPG, PNG, WebP) are shrunk to at most
+ * Saves an uploaded picture in public/images. Photos and icons (JPG, PNG, GIF, WebP) are shrunk to at most
  * MAX_SIDE pixels on the long side and saved as WebP, so a 6 MB phone photo does not slow the site down.
- * SVG and GIF files are kept exactly as uploaded, and so is any picture the server cannot convert.
+ * SVG (already a vector) and animated GIF files are kept exactly as uploaded, and so is any picture the
+ * server cannot convert (that is written to the log, see "php artisan images:webp --check").
  *
  * The file name keeps the convention used everywhere else on the site: 20261115_093000_<uuid>_<name>.<ext>
  */
@@ -18,7 +20,7 @@ class ImageUploader
 
     public const QUALITY = 82;
 
-    private const CONVERTIBLE = ['image/jpeg', 'image/png', 'image/webp'];
+    private const CONVERTIBLE = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
     /**
      * @param  int|null  $maxSide  longest side to keep (default MAX_SIDE); menu icons and dish photos use smaller limits
@@ -35,6 +37,12 @@ class ImageUploader
             return $converted;
         }
 
+        $mime = (string) $file->getMimeType();
+
+        if (in_array($mime, self::CONVERTIBLE, true) && ($mime !== 'image/gif' || ! self::isAnimatedGif((string) $file->getRealPath()))) {
+            Log::warning('Picture saved as uploaded, not as WebP: '.$file->getClientOriginalName().' ('.$mime.'). Run "php artisan images:webp --check" to see why.');
+        }
+
         $original = strtolower($file->getClientOriginalExtension());
         $extension = $original === 'svg' ? 'svg' : ($file->guessExtension() ?: ($original ?: 'jpg'));
         $filename = $base.'.'.$extension;
@@ -45,26 +53,88 @@ class ImageUploader
     }
 
     /**
-     * Whether this server can turn pictures into WebP.
+     * Whether this server can turn pictures into WebP (PHP GD with WebP, or Imagick with WebP).
      */
     public static function canConvert(): bool
+    {
+        return self::canGd() || self::canImagick();
+    }
+
+    public static function canGd(): bool
     {
         return extension_loaded('gd') && function_exists('imagewebp');
     }
 
+    public static function canImagick(): bool
+    {
+        return extension_loaded('imagick') && class_exists(\Imagick::class) && \Imagick::queryFormats('WEBP') !== [];
+    }
+
+    /**
+     * A GIF with more than one frame. GD cannot write an animated WebP, so these stay as GIF.
+     */
+    public static function isAnimatedGif(string $path): bool
+    {
+        $handle = $path !== '' ? @fopen($path, 'rb') : false;
+
+        if ($handle === false) {
+            return false;
+        }
+
+        $frames = 0;
+
+        while (! feof($handle) && $frames < 2) {
+            $chunk = fread($handle, 102400);
+
+            if ($chunk === false) {
+                break;
+            }
+
+            $frames += (int) preg_match_all('#\x00\x21\xF9\x04.{4}\x00[\x2C\x21]#s', $chunk);
+        }
+
+        fclose($handle);
+
+        return $frames > 1;
+    }
+
     private static function convert(UploadedFile $file, string $base, int $maxSide): ?string
     {
-        $mime = $file->getMimeType();
-        $path = $file->getRealPath();
+        $mime = (string) $file->getMimeType();
+        $path = (string) $file->getRealPath();
 
-        if (! self::canConvert() || ! $path || ! in_array($mime, self::CONVERTIBLE, true)) {
+        if ($path === '' || ! in_array($mime, self::CONVERTIBLE, true)) {
             return null;
         }
 
+        if ($mime === 'image/gif' && self::isAnimatedGif($path)) {
+            return null;
+        }
+
+        $filename = $base.'.webp';
+
+        return self::encode($path, $mime, public_path('images/'.$filename), $maxSide) ? 'images/'.$filename : null;
+    }
+
+    /**
+     * Writes a WebP copy of the picture at $path to $target, shrunk to at most $maxSide pixels on the long side.
+     * Tries PHP GD first, then Imagick. Returns false (and leaves no half-written file) when it cannot.
+     */
+    public static function encode(string $path, string $mime, string $target, int $maxSide): bool
+    {
+        if (self::canGd() && self::encodeWithGd($path, $mime, $target, $maxSide)) {
+            return true;
+        }
+
+        return self::canImagick() && self::encodeWithImagick($path, $target, $maxSide);
+    }
+
+    private static function encodeWithGd(string $path, string $mime, string $target, int $maxSide): bool
+    {
         $size = @getimagesize($path);
 
         if ($size === false) {
-            return null;
+            return false;
         }
 
         // A decoded picture needs about 4 bytes per pixel, and the shrunk copy exists at the same time.
@@ -73,23 +143,24 @@ class ImageUploader
         $previousLimit = self::makeRoomFor($needed);
 
         if ($previousLimit === false) {
-            return null; // not enough memory: the original is stored as it is
+            return false; // not enough memory
         }
 
         try {
             $source = match ($mime) {
                 'image/jpeg' => @imagecreatefromjpeg($path),
                 'image/png' => @imagecreatefrompng($path),
+                'image/gif' => @imagecreatefromgif($path),
                 default => @imagecreatefromwebp($path),
             };
 
             if ($source === false) {
-                return null;
+                return false;
             }
 
-            // WebP cannot be written from a palette picture (an 8-bit PNG).
+            // WebP cannot be written from a palette picture (an 8-bit PNG or a GIF).
             if (! imageistruecolor($source) && ! imagepalettetotruecolor($source)) {
-                return null;
+                return false;
             }
 
             if ($mime === 'image/jpeg') {
@@ -101,22 +172,47 @@ class ImageUploader
             imagealphablending($source, false);
             imagesavealpha($source, true);
 
-            $filename = $base.'.webp';
-            $target = public_path('images/'.$filename);
-
             if (! @imagewebp($source, $target, self::QUALITY)) {
                 @unlink($target);
 
-                return null;
+                return false;
             }
 
-            return 'images/'.$filename;
+            return true;
         } finally {
             unset($source);
 
             if ($previousLimit !== null) {
                 ini_set('memory_limit', $previousLimit);
             }
+        }
+    }
+
+    private static function encodeWithImagick(string $path, string $target, int $maxSide): bool
+    {
+        try {
+            $image = new \Imagick($path.'[0]');
+
+            if (method_exists($image, 'autoOrient')) {
+                $image->autoOrient();
+            }
+
+            if (max($image->getImageWidth(), $image->getImageHeight()) > $maxSide) {
+                $image->scaleImage($maxSide, $maxSide, true);
+            }
+
+            $image->setImageFormat('webp');
+            $image->setImageCompressionQuality(self::QUALITY);
+            $image->stripImage();
+
+            $written = $image->writeImage($target);
+            $image->clear();
+
+            return (bool) $written;
+        } catch (\Throwable) {
+            @unlink($target);
+
+            return false;
         }
     }
 

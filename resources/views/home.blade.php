@@ -20,6 +20,7 @@
         'resources/js/home-video.js',
         'resources/css/theme.css',
         'resources/css/home-villas.css',
+        'resources/css/home-contact.css',
         'resources/css/home-experiences.css',
         'resources/js/home-experiences.js',
         'resources/css/villa-gallery.css',
@@ -995,26 +996,6 @@ $contactFooter = $contents
 <section class="long-stay-section" id="longstay">
 
     {{-- =========================================
-         BOOK YOUR STAY BUTTON
-    ========================================== --}}
-
-    @if($longStayBooking)
-
-        <a
-            href="{{ in_array($longStayBooking->button_url ?? '#', ['#','#booking']) ? '#contact' : $longStayBooking->button_url }}"
-            class="long-stay-booking"
-        >
-
-            <span class="long-stay-booking-icon" aria-hidden="true"><img src="{{ asset('images/logo-badge.png') }}" alt="" class="cv-booking-logo"></span>
-
-            {{ $longStayBooking->button_text }}
-
-        </a>
-
-    @endif
-
-
-    {{-- =========================================
          MAIN LONG STAY CONTENT
     ========================================== --}}
 
@@ -1454,6 +1435,10 @@ $contactFooter = $contents
          CONTACT INFORMATION AREA
     ====================================================== --}}
 
+    @php
+        $mapInfo = $contactMap ? \App\Support\MapEmbed::from($contactMap) : null;
+    @endphp
+
     <div class="contact-main">
 
 
@@ -1461,7 +1446,7 @@ $contactFooter = $contents
              GET IN TOUCH
         ================================================== --}}
 
-        <div class="contact-information">
+        <div class="contact-information cm-card">
 
             <h3>
                 {{ $hl(2)?->title }}
@@ -1476,9 +1461,26 @@ $contactFooter = $contents
                         @php
                             $t = strtolower($info->title);
                             $infoIcon = str_contains($t, 'location') ? 'pin' : (str_contains($t, 'phone') || str_contains($t, 'whatsapp') ? 'phone' : (str_contains($t, 'mail') ? 'mail' : 'clock'));
+                            $infoText = trim((string) $info->description);
+                            $infoHref = null;
+                            $infoCta = null;
+
+                            // Phone, email and location are tappable: call, write or get directions in one touch.
+                            if ($infoIcon === 'phone') {
+                                $digits = preg_replace('/[^+0-9]/', '', $infoText);
+                                $infoHref = $digits ? 'tel:' . $digits : null;
+                                $infoCta = 'Call now';
+                            } elseif ($infoIcon === 'mail') {
+                                $first = trim((string) strtok($infoText, " \n\r"));
+                                $infoHref = filter_var($first, FILTER_VALIDATE_EMAIL) ? 'mailto:' . $first : null;
+                                $infoCta = 'Send an email';
+                            } elseif ($infoIcon === 'pin' && $mapInfo) {
+                                $infoHref = $mapInfo['link'];
+                                $infoCta = 'Get directions';
+                            }
                         @endphp
 
-                        <div class="contact-info-item">
+                        <div class="contact-info-item {{ $infoHref ? 'has-link' : '' }}">
 
                             <div class="contact-info-icon">
                                 <x-icon :name="$infoIcon" :size="24" />
@@ -1495,6 +1497,12 @@ $contactFooter = $contents
                                 <p>
                                     {!! nl2br(e($info->description)) !!}
                                 </p>
+
+                                @if($infoHref)
+                                    <a class="contact-info-cta" href="{{ $infoHref }}" @if($infoIcon === 'pin') target="_blank" rel="noopener" @endif>
+                                        {{ $infoCta }} <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                                    </a>
+                                @endif
 
                             </div>
 
@@ -1515,7 +1523,7 @@ $contactFooter = $contents
 
         @if($contactForm)
 
-            <div class="contact-form-wrapper">
+            <div class="contact-form-wrapper cm-card">
 
                 <h3>
                     {{ $contactForm->title }}
@@ -1526,6 +1534,7 @@ $contactFooter = $contents
                     class="contact-form"
                     action="{{ route('contact.store') }}#contact"
                     method="POST"
+                    data-cm-form
                 >
 
                     @csrf
@@ -1540,37 +1549,39 @@ $contactFooter = $contents
 
                     <div class="contact-form-row">
 
-                        <input
-                            type="text"
-                            name="name" value="{{ old('name') }}"
-                            placeholder="Full Name"
-                        >
+                        <label class="cm-field">
+                            <span>Full name <b aria-hidden="true">*</b></span>
+                            <input type="text" name="name" value="{{ old('name') }}" placeholder="Your full name" autocomplete="name" maxlength="100" required @class(['is-invalid' => $errors->has('name')])>
+                            @error('name')<em class="cm-err" role="alert">{{ $message }}</em>@enderror
+                        </label>
 
 
-                        <input
-                            type="email"
-                            name="email" value="{{ old('email') }}"
-                            placeholder="Email Address"
-                        >
+                        <label class="cm-field">
+                            <span>Email address <b aria-hidden="true">*</b></span>
+                            <input type="email" name="email" value="{{ old('email') }}" placeholder="Your email" autocomplete="email" maxlength="150" required @class(['is-invalid' => $errors->has('email')])>
+                            @error('email')<em class="cm-err" role="alert">{{ $message }}</em>@enderror
+                        </label>
 
                     </div>
 
 
-                    <input
-                        type="text"
-                        name="subject" value="{{ old('subject') }}"
-                        placeholder="Subject"
-                    >
+                    <label class="cm-field">
+                            <span>Subject <b aria-hidden="true">*</b></span>
+                            <input type="text" name="subject" value="{{ old('subject') }}" placeholder="How can we help?" maxlength="150" required @class(['is-invalid' => $errors->has('subject')])>
+                            @error('subject')<em class="cm-err" role="alert">{{ $message }}</em>@enderror
+                        </label>
 
 
-                    <textarea
-                        name="message"
-                        placeholder="Your Message"
-                    >{{ old('message') }}</textarea>
+                    <label class="cm-field">
+                            <span>Your message <b aria-hidden="true">*</b></span>
+                            <textarea name="message" rows="5" placeholder="Tell us about your plans, dates or questions" maxlength="3000" required @class(['is-invalid' => $errors->has('message')])>{{ old('message') }}</textarea>
+                            @error('message')<em class="cm-err" role="alert">{{ $message }}</em>@enderror
+                        </label>
 
 
                     <button type="submit">
-                        {{ $contactForm->button_text }}
+                        <span>{{ $contactForm->button_text }}</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                     </button>
 
                 </form>
@@ -1595,7 +1606,7 @@ $contactFooter = $contents
 
         @if($contactMap)
 
-            <div class="contact-map-wrapper">
+            <div class="contact-map-wrapper cm-card">
 
                 <h3>
                     {{ $contactMap->title }}
@@ -1605,7 +1616,7 @@ $contactFooter = $contents
                 <div class="contact-map">
 
                     <iframe
-                        src="{{ \App\Support\MapEmbed::from($contactMap)['embed'] }}"
+                        src="{{ $mapInfo['embed'] }}"
                         title="Casa Verde Cliff Resort &amp; Spa on Google Maps"
                         loading="lazy"
                         referrerpolicy="no-referrer-when-downgrade"
@@ -1614,11 +1625,27 @@ $contactFooter = $contents
 
                 </div>
 
+                <p class="cm-address">{{ $mapInfo['address'] }}</p>
+
+                <a class="cm-directions" href="{{ $mapInfo['link'] }}" target="_blank" rel="noopener">
+                    Get directions <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </a>
+
             </div>
 
         @endif
 
     </div>
+
+    <script>
+        // A sent form cannot be sent twice by a second tap
+        document.querySelectorAll('[data-cm-form]').forEach(function (form) {
+            form.addEventListener('submit', function () {
+                var button = form.querySelector('button[type="submit"]');
+                if (button) { button.disabled = true; button.classList.add('is-busy'); }
+            });
+        });
+    </script>
 
 
 </section>
