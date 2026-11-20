@@ -26,6 +26,25 @@
         <a href="{{ route('admin.content.index') }}" class="btn-secondary self-start whitespace-nowrap sm:self-auto">Edit site content</a>
     </div>
 
+    @include('admin.media._webp')
+
+    @include('admin.media._cleanup')
+
+    <style>
+    .mf-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px; border: 1px solid #dcd0bc; border-radius: 14px; background: #fff; }
+    .mf-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+    .mf-search { position: relative; display: block; flex: 1 1 260px; max-width: 420px; }
+    .mf-search svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #52625c; pointer-events: none; }
+    .mf-search input, .mf-select select { display: block; width: 100%; height: 44px; margin: 0; border: 1px solid #dcd0bc; border-radius: 10px; background-color: #fcfaf6; color: #12241f; font-size: .94rem; transition: border-color .2s, box-shadow .2s, background-color .2s; }
+    .mf-search input { padding: 0 14px 0 42px; }
+    .mf-search input::placeholder { color: #7d8b85; }
+    .mf-select { position: relative; display: block; flex: 0 0 auto; }
+    .mf-select select { appearance: none; -webkit-appearance: none; min-width: 168px; padding: 0 40px 0 14px; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2352625c' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 18px; }
+    .mf-search input:hover, .mf-select select:hover { border-color: #b9ab92; }
+    .mf-search input:focus, .mf-select select:focus { outline: 0; border-color: #1c5646; background-color: #fff; box-shadow: 0 0 0 4px rgba(201, 160, 106, .25); }
+    @media (max-width: 640px) { .mf-search { flex-basis: 100%; max-width: none; } .mf-select { flex: 1 1 auto; } .mf-select select { min-width: 0; } }
+    </style>
+
     {{-- Filters --}}
     <div class="mt-8 space-y-4">
         <div class="flex flex-wrap items-center gap-2">
@@ -44,18 +63,29 @@
             @endforeach
         </div>
 
-        <form method="GET" action="{{ route('admin.media.index') }}" class="flex flex-wrap items-center gap-3">
+        <form method="GET" action="{{ route('admin.media.index') }}" class="mf-bar">
             @if ($type) <input type="hidden" name="type" value="{{ $type }}"> @endif
             @if ($status) <input type="hidden" name="status" value="{{ $status }}"> @endif
-            <input type="search" name="q" value="{{ $search }}" placeholder="Search by file name" class="field-input !mt-0 max-w-xs" aria-label="Search by file name">
-            <select name="sort" class="field-input !mt-0 w-auto" aria-label="Sort">
-                <option value="newest" @selected($sort === 'newest')>Newest first</option>
-                <option value="oldest" @selected($sort === 'oldest')>Oldest first</option>
-                <option value="name" @selected($sort === 'name')>File name</option>
-            </select>
-            <button type="submit" class="btn-secondary">Apply</button>
+
+            <label class="mf-search">
+                <span class="mf-hidden">Search by file name</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+                <input type="search" name="q" value="{{ $search }}" placeholder="Search by file name">
+            </label>
+
+            <label class="mf-select">
+                <span class="mf-hidden">Sort</span>
+                <select name="sort" onchange="this.form.submit()">
+                    <option value="newest" @selected($sort === 'newest')>Newest first</option>
+                    <option value="oldest" @selected($sort === 'oldest')>Oldest first</option>
+                    <option value="name" @selected($sort === 'name')>File name</option>
+                </select>
+            </label>
+
+            <button type="submit" class="mc-btn mc-btn--primary">Apply</button>
+
             @if ($search !== '' || $sort !== 'newest')
-                <a href="{{ request()->fullUrlWithQuery(['q' => null, 'sort' => null]) }}" class="text-sm text-ink-soft underline">Clear</a>
+                <a href="{{ request()->fullUrlWithQuery(['q' => null, 'sort' => null]) }}" class="mc-btn mc-btn--ghost">Clear</a>
             @endif
         </form>
     </div>
@@ -73,7 +103,7 @@
     @else
         <ul role="list" class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
             @foreach ($items as $file)
-                <li class="flex flex-col overflow-hidden rounded-xl border border-sand-300 bg-white">
+                <li class="flex flex-col overflow-hidden rounded-xl border border-sand-300 bg-white" data-media-card>
                     <a href="{{ asset($file['path']) }}" target="_blank" rel="noopener"
                        class="block h-44 border-b border-sand-200 p-3"
                        style="background-image:conic-gradient(#efeae0 25%,#fff 0 50%,#efeae0 0 75%,#fff 0);background-size:16px 16px"
@@ -125,6 +155,22 @@
                         @else
                             <p class="mt-auto pt-1 text-sm text-ink-soft">Nothing on the site uses this file.</p>
                         @endif
+
+                        <div class="mc-pic-actions">
+                            <a href="{{ asset($file['path']) }}" target="_blank" rel="noopener" class="mc-link">Open full size</a>
+
+                            @if ($file['status'] === 'unused')
+                                <button type="button" class="mc-trash"
+                                        data-trash-path="{{ $file['path'] }}"
+                                        data-trash-src="{{ asset($file['path']) }}"
+                                        data-trash-risky="{{ in_array($file['type'], ['icon', 'symbol'], true) ? '1' : '0' }}">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12.2a1.8 1.8 0 0 0 1.8 1.8h6.4a1.8 1.8 0 0 0 1.8-1.8L18 7M9 7V4.8A.8.8 0 0 1 9.8 4h4.4a.8.8 0 0 1 .8.8V7"/></svg>
+                                    Move to trash
+                                </button>
+                            @else
+                                <span class="mc-pic-note">In use, can't be removed</span>
+                            @endif
+                        </div>
                     </div>
                 </li>
             @endforeach

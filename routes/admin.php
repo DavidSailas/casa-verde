@@ -11,8 +11,10 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\GalleryPhotosController;
 use App\Http\Controllers\Admin\LanguageController;
 use App\Http\Controllers\Admin\MediaController;
+use App\Http\Controllers\Admin\MediaTrashController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\StaffController;
+use App\Http\Controllers\Admin\WebpController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -52,6 +54,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Media library: every photo, icon, symbol and logo, and which ones the site uses now.
         Route::get('media', [MediaController::class, 'index'])->name('media.index')->middleware('admin.area:media');
+
+        // Convert the pictures that were uploaded before WebP became automatic (a few at a time, from the Media library page).
+        Route::get('media/webp', [WebpController::class, 'status'])->name('media.webp.status')->middleware('admin.area:media');
+        Route::post('media/webp', [WebpController::class, 'run'])->name('media.webp.run')->middleware('admin.area:media');
+
+        // Clean up: pictures go to a recoverable trash first (see App\Support\MediaTrash).
+        Route::get('media/cleanup', [MediaTrashController::class, 'status'])->name('media.cleanup.status')->middleware('admin.area:media');
+        Route::post('media/cleanup', [MediaTrashController::class, 'move'])->name('media.cleanup.move')->middleware('admin.area:media');
+        Route::post('media/cleanup/restore', [MediaTrashController::class, 'restore'])->name('media.cleanup.restore')->middleware('admin.area:media');
+        Route::post('media/cleanup/empty', [MediaTrashController::class, 'empty'])->name('media.cleanup.empty')->middleware('admin.area:media');
 
         // Gallery photos: see and change every photo on the Gallery page in one place.
         Route::prefix('gallery')->name('gallery.')->middleware('admin.area:gallery')->controller(GalleryPhotosController::class)->group(function () {
