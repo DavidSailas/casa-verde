@@ -55,6 +55,24 @@ function initLightbox(dialog) {
     dialog.querySelector('[data-bk-lb-prev]').addEventListener('click', () => show(i - 1));
     dialog.querySelector('[data-bk-lb-next]').addEventListener('click', () => show(i + 1));
     dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+
+    // Swipe left or right on a touch screen (the arrows are hidden there)
+    let touchX = null;
+    let touchY = null;
+
+    dialog.addEventListener('touchstart', (e) => {
+        touchX = e.changedTouches[0].clientX;
+        touchY = e.changedTouches[0].clientY;
+    }, { passive: true });
+
+    dialog.addEventListener('touchend', (e) => {
+        if (touchX === null) return;
+        const dx = e.changedTouches[0].clientX - touchX;
+        const dy = e.changedTouches[0].clientY - touchY;
+        touchX = null;
+        if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) show(i + (dx < 0 ? 1 : -1));
+    }, { passive: true });
+
     dialog.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft') show(i - 1);
         if (e.key === 'ArrowRight') show(i + 1);

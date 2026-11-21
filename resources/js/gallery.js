@@ -65,6 +65,23 @@ document.addEventListener('DOMContentLoaded', () => {
     box.querySelector('.gal-lb-next').addEventListener('click', () => step(1));
     box.addEventListener('click', (e) => { if (e.target === box) close(); });
 
+    // Swipe left or right on a touch screen (the arrows are hidden there)
+    let touchX = null;
+    let touchY = null;
+
+    box.addEventListener('touchstart', (e) => {
+        touchX = e.changedTouches[0].clientX;
+        touchY = e.changedTouches[0].clientY;
+    }, { passive: true });
+
+    box.addEventListener('touchend', (e) => {
+        if (touchX === null) return;
+        const dx = e.changedTouches[0].clientX - touchX;
+        const dy = e.changedTouches[0].clientY - touchY;
+        touchX = null;
+        if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) step(dx < 0 ? 1 : -1);
+    }, { passive: true });
+
     document.addEventListener('keydown', (e) => {
         if (box.hidden) return;
         if (e.key === 'Escape') close();

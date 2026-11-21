@@ -80,17 +80,15 @@
     .exp-slide .experience-content p { font-size: clamp(13px, 1.05vw, 16px); max-width: 80%; margin-inline: auto; }
 }
 
-/* Phones: the neighbours only peek out from behind the middle card */
+/* Phones: a taller card you swipe, with the neighbours peeking out from behind it (the arrows are hidden on touch screens) */
 @media (max-width: 700px) {
-    .exp-carousel { --exp-w: min(68vw, 340px); }
-    .exp-slide[data-pos="-1"] { transform: translateX(calc(var(--exp-w) * -.86)) scale(.82); }
-    .exp-slide[data-pos="1"]  { transform: translateX(calc(var(--exp-w) * .86)) scale(.82); }
-    .exp-arrow { top: auto; bottom: -58px; width: 42px; height: 42px; transform: none; }
-    .exp-arrow:active { transform: scale(.94); }
-    .exp-arrow--prev { left: calc(50% - 130px); }
-    .exp-arrow--next { right: calc(50% - 130px); }
-    .exp-dots { margin-top: 16px; }
-    .exp-dot[aria-current="true"] { width: 22px; }
+    .exp-carousel { --exp-w: min(78vw, 360px); margin-bottom: 6px; }
+    .exp-slide[data-pos="-1"] { transform: translateX(calc(var(--exp-w) * -.9)) scale(.84); }
+    .exp-slide[data-pos="1"]  { transform: translateX(calc(var(--exp-w) * .9)) scale(.84); }
+    .exp-slide .experience-card { height: calc(var(--exp-w) * 1.05); border-radius: 22px; }
+    .exp-dots { gap: 8px; margin-top: 18px; }
+    .exp-dot { width: 8px; height: 8px; }
+    .exp-dot[aria-current="true"] { width: 24px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

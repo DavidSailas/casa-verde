@@ -402,6 +402,14 @@
 }
 </style>
 
+<style id="cv-touch-css">
+/* Touch screens and phones: sliders are swiped, so their previous/next arrow buttons are hidden.
+   (Dots, the close buttons and keyboard control stay. Mouse users on a computer still see the arrows.) */
+@media (hover: none) and (pointer: coarse), (max-width: 767px) {
+    .exp-arrow, .rv-arrow, .vm-arrow, .yg-arrows, .gal-lb-nav, .bk-lb-nav, .mb-arrow { display: none !important; }
+}
+</style>
+
 <script>
 // Phone bottom bar: the "More" button opens the full menu as a sheet; it closes on a tap outside, on Escape, on a link.
 (function () {
