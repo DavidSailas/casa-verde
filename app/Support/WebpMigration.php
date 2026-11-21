@@ -141,6 +141,92 @@ class WebpMigration
     }
 
     /**
+     * Every picture path (images/...) that the database mentions, with how many places mention it.
+     * JSON columns store slashes escaped, so those are read as normal slashes first.
+     *
+     * @return array<string, int>
+     */
+    public static function references(): array
+    {
+        $found = [];
+
+        foreach (Schema::getTables() as $table) {
+            $name = $table['name'];
+
+            if (in_array($name, self::TABLES_TO_IGNORE, true) || ! Schema::hasColumn($name, 'id')) {
+                continue;
+            }
+
+            $columns = [];
+
+            foreach (Schema::getColumns($name) as $column) {
+                if ($column['name'] !== 'id' && preg_match('/char|text|json|string/i', (string) $column['type_name'])) {
+                    $columns[] = $column['name'];
+                }
+            }
+
+            if ($columns === []) {
+                continue;
+            }
+
+            DB::table($name)->orderBy('id')->chunkById(200, function ($rows) use ($columns, &$found): void {
+                foreach ($rows as $row) {
+                    foreach ($columns as $column) {
+                        $value = $row->{$column} ?? null;
+
+                        if (! is_string($value) || ! str_contains($value, 'images')) {
+                            continue;
+                        }
+
+                        $value = str_replace('\\/', '/', $value);
+
+                        if (preg_match_all('#images/[^\s"\'<>\\?]+?\.(?:jpe?g|png|gif|webp)#i', $value, $matches)) {
+                            foreach ($matches[0] as $path) {
+                                $found[$path] = ($found[$path] ?? 0) + 1;
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        ksort($found);
+
+        return $found;
+    }
+
+    /**
+     * A picture that does exist and is the same one in another format or with another capitalisation
+     * (a Linux server tells "Villa.JPG" and "villa.jpg" apart; a Windows computer does not).
+     */
+    public static function alternative(string $path): ?string
+    {
+        $base = (string) preg_replace('/\.[A-Za-z0-9]+$/', '', $path);
+
+        foreach (['webp', 'jpg', 'jpeg', 'png', 'gif'] as $extension) {
+            $candidate = $base.'.'.$extension;
+
+            if ($candidate !== $path && is_file(public_path($candidate))) {
+                return $candidate;
+            }
+        }
+
+        $folder = public_path(dirname($path));
+
+        if (is_dir($folder)) {
+            $wanted = strtolower(pathinfo($path, PATHINFO_FILENAME));
+
+            foreach (scandir($folder) ?: [] as $file) {
+                if ($file !== '.' && $file !== '..' && strtolower(pathinfo($file, PATHINFO_FILENAME)) === $wanted && is_file($folder.'/'.$file)) {
+                    return dirname($path).'/'.$file;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Replaces the old picture names with the new ones in every text column of every table that has an "id".
      * Returns the number of rows that changed (or would change, on a dry run).
      *
