@@ -11,7 +11,7 @@
         'resources/css/pages.css',
         'resources/css/theme.css',
         'resources/css/footer.css','resources/css/rule.css', 'resources/css/responsive.css',
-        'resources/css/winter.css', 'resources/js/winter.js',
+        'resources/css/winter.css',
         'resources/js/app.js'
     ])
 </head>

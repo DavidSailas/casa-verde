@@ -19,7 +19,7 @@
 
 
 </head>
-<body>
+<body data-no-photo-viewer>
     @include('layouts.header')
     @php
         $img = fn (?string $path, string $fallback = 'images/main.jpg') => asset($path && file_exists(public_path($path)) ? $path : $fallback);

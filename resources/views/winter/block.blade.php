@@ -59,10 +59,9 @@
                     </div>
                     @if($hasImage)
                         <figure class="wr-photo">
-                            <button type="button" class="wr-zoom" data-wr-zoom data-full="{{ asset($tab['image']) }}" data-caption="{{ $tab['heading'] }}" aria-label="Foto vergrößern: {{ $tab['heading'] }}">
+                            <div class="wr-zoom">
                                 <img src="{{ asset($tab['image']) }}" alt="{{ $tab['heading'] }}" loading="lazy">
-                                <span class="wr-zoom__hint" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2M11 8.5v5M8.5 11h5"/></svg></span>
-                            </button>
+                            </div>
                         </figure>
                     @endif
                 </div>
@@ -72,10 +71,9 @@
                         @foreach($tab['cards'] as $card)
                             <li class="wr-card" style="--wr-i: {{ $loop->index }}">
                                 @if(filled($card['image']) && file_exists(public_path($card['image'])))
-                                    <button type="button" class="wr-zoom" data-wr-zoom data-full="{{ asset($card['image']) }}" data-caption="{{ trim($card['title'].' '.($card['title'] !== '' && $card['text'] !== '' ? '— ' : '').$card['text']) }}" aria-label="Foto vergrößern: {{ $card['title'] ?: $tab['heading'] }}">
+                                    <div class="wr-zoom">
                                         <img src="{{ asset($card['image']) }}" alt="{{ $card['title'] ?: $tab['heading'] }}" loading="lazy">
-                                        <span class="wr-zoom__hint" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2M11 8.5v5M8.5 11h5"/></svg></span>
-                                    </button>
+                                    </div>
                                 @endif
                                 @if(trim((string) $card['title']) !== '' || trim((string) $card['text']) !== '')
                                     <div class="wr-card__body">

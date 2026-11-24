@@ -271,7 +271,7 @@
 
 </head>
 
-<body>
+<body data-no-photo-viewer>
 
 @include('layouts.header')
 

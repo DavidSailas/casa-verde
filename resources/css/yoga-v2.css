@@ -291,7 +291,7 @@ main.yg #gallery .yg-slide {
     box-shadow: 0 30px 44px -28px rgba(0, 0, 0, .85);
     background: #0e3629;
 }
-main.yg #gallery .yg-slide img { width: 100%; aspect-ratio: 4 / 5; border-radius: 0; box-shadow: none; transition: transform .7s cubic-bezier(.2, .6, .2, 1); cursor: zoom-in; }
+main.yg #gallery .yg-slide img { width: 100%; aspect-ratio: 4 / 5; border-radius: 0; box-shadow: none; transition: transform .7s cubic-bezier(.2, .6, .2, 1); }
 main.yg #gallery .yg-slide:hover img { transform: scale(1.05); }
 main.yg #gallery .yg-slide figcaption {
     position: absolute; left: 0; right: 0; bottom: 0;

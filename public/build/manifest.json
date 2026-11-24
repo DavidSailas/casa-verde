@@ -252,7 +252,7 @@
     "isEntry": true
   },
   "resources/css/winter.css": {
-    "file": "assets/winter-CumDvwgB.css",
+    "file": "assets/winter-BTSdgoZs.css",
     "name": "winter",
     "names": [
       "winter.css"
@@ -270,7 +270,7 @@
     "isEntry": true
   },
   "resources/css/yoga-v2.css": {
-    "file": "assets/yoga-v2-DTqk3s3p.css",
+    "file": "assets/yoga-v2-DDHmEYw7.css",
     "name": "yoga-v2",
     "names": [
       "yoga-v2.css"
@@ -366,12 +366,6 @@
     "file": "assets/widgets-LEd-Rt8Z.js",
     "name": "widgets",
     "src": "resources/js/widgets.js",
-    "isEntry": true
-  },
-  "resources/js/winter.js": {
-    "file": "assets/winter-CadvOF7X.js",
-    "name": "winter",
-    "src": "resources/js/winter.js",
     "isEntry": true
   },
   "resources/js/yoga-book.js": {

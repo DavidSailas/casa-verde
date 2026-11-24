@@ -1,5 +1,5 @@
 /* =====================================================================
-   Winterresidenz page: refined design + photo viewer.
+   Winterresidenz page: refined design.
    Loaded after footer.css, so these rules refine the base "wr-" styles there.
    ===================================================================== */
 
@@ -70,53 +70,22 @@
 }
 .wr .wr-body:not(.wr-body--split) .wr-copy h3::after { margin-left: auto; margin-right: auto; background: linear-gradient(90deg, transparent, var(--wr-gold), transparent); width: 120px; }
 
-/* ---------- Photos (clickable) ---------- */
+/* ---------- Photos (display only, not clickable) ---------- */
 .wr .wr-zoom {
-    appearance: none; display: block; position: relative; width: 100%; margin: 0; padding: 0;
-    border: 0; background: #031a13; overflow: hidden; cursor: zoom-in; border-radius: 22px; color: inherit;
+    display: block; position: relative; width: 100%; margin: 0; padding: 0;
+    border: 0; background: #031a13; overflow: hidden; cursor: default; border-radius: 22px;
     box-shadow: 0 0 0 1px rgba(201, 160, 106, .42), 0 22px 40px -24px rgba(0, 0, 0, .9);
-    transition: box-shadow .35s, transform .35s;
 }
 .wr .wr-zoom img {
     position: absolute; inset: 0; display: block; width: 100%; height: 100%; aspect-ratio: auto !important; object-fit: cover;
     border: 0; border-radius: 0;
-    transition: transform .8s cubic-bezier(.2, .7, .2, 1), filter .4s;
 }
-.wr .wr-zoom::after {
-    content: ""; position: absolute; inset: 0; pointer-events: none;
-    background: linear-gradient(180deg, transparent 55%, rgba(2, 21, 15, .55));
-    opacity: 0; transition: opacity .35s;
-}
-.wr .wr-zoom__hint {
-    position: absolute; z-index: 2; right: 14px; bottom: 14px; width: 42px; height: 42px;
-    display: grid; place-items: center; border-radius: 50%;
-    background: rgba(3, 26, 19, .78); color: #f3d6ae; border: 1px solid rgba(226, 185, 138, .6);
-    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-    opacity: 0; transform: translateY(8px) scale(.9); transition: opacity .3s, transform .3s;
-}
-.wr .wr-zoom:hover, .wr .wr-zoom:focus-visible {
-    transform: translateY(-4px);
-    box-shadow: 0 0 0 2px #d9ac75, 0 30px 46px -22px rgba(0, 0, 0, .95), 0 0 34px -8px rgba(226, 185, 138, .45);
-}
-.wr .wr-zoom:hover img, .wr .wr-zoom:focus-visible img { transform: scale(1.06); }
-.wr .wr-zoom:hover::after, .wr .wr-zoom:focus-visible::after { opacity: 1; }
-.wr .wr-zoom:hover .wr-zoom__hint, .wr .wr-zoom:focus-visible .wr-zoom__hint { opacity: 1; transform: none; }
-.wr .wr-zoom:focus-visible { outline: 3px solid rgba(243, 214, 174, .8); outline-offset: 3px; }
-@media (hover: none) { .wr .wr-zoom__hint { opacity: 1; transform: none; width: 36px; height: 36px; right: 10px; bottom: 10px; } }
-
 .wr .wr-photo .wr-zoom { aspect-ratio: 4 / 5; }
-.wr .wr-photo .wr-zoom img { aspect-ratio: auto; }
 
 /* ---------- Photo cards ---------- */
 .wr .wr-cards { margin-top: clamp(30px, 4vw, 48px); gap: clamp(16px, 2.6vw, 34px); }
-.wr .wr-card {
-    gap: 0; text-align: left; border-radius: 24px; overflow: hidden;
-    transition: transform .35s;
-}
+.wr .wr-card { gap: 0; text-align: left; border-radius: 24px; overflow: hidden; }
 .wr .wr-card .wr-zoom { aspect-ratio: 4 / 3; border-radius: 24px; }
-.wr .wr-card .wr-zoom img { aspect-ratio: auto; border: 0; }
-.wr .wr-cards--photos .wr-card .wr-zoom { aspect-ratio: 4 / 3; }
-.wr .wr-cards--photos.wr-cards--3 .wr-card img { aspect-ratio: auto; }
 .wr .wr-cards--photos.wr-cards--4 .wr-zoom { aspect-ratio: 1 / 1; }
 .wr .wr-cards--1 { grid-template-columns: minmax(0, 560px); }
 
@@ -125,9 +94,7 @@
     background: var(--wr-card); border: 1px solid var(--wr-line);
     box-shadow: 0 24px 44px -30px rgba(0, 0, 0, .9);
 }
-.wr .wr-card:has(.wr-card__body):hover { transform: translateY(-5px); border-color: rgba(226, 185, 138, .7); }
 .wr .wr-card:has(.wr-card__body) .wr-zoom { border-radius: 0; box-shadow: none; }
-.wr .wr-card:has(.wr-card__body) .wr-zoom:hover, .wr .wr-card:has(.wr-card__body) .wr-zoom:focus-visible { transform: none; box-shadow: none; }
 .wr .wr-card__body { padding: 22px 24px 26px; display: grid; gap: 10px; position: relative; }
 .wr .wr-card__body::before {
     content: ""; width: 34px; height: 2px; border-radius: 2px; background: var(--wr-gold);
@@ -244,58 +211,4 @@
     .wr .wr-card .wr-zoom, .wr .wr-cards--photos.wr-cards--4 .wr-zoom { aspect-ratio: 4 / 3; }
     .wr .wr-eyebrow { letter-spacing: .22em; font-size: .7rem; gap: 10px; }
     .wr .wr-line a, .wr .wr-line > span { font-size: .95rem; padding: 9px 14px; }
-}
-
-/* =====================================================================
-   Photo viewer
-   ===================================================================== */
-body.wr-viewer-open { overflow: hidden; }
-.wr-viewer[hidden], .wr-viewer [hidden] { display: none !important; }
-.wr-viewer {
-    position: fixed; inset: 0; z-index: 2147483000; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto;
-    background: radial-gradient(900px 600px at 50% 40%, rgba(8, 44, 34, .96), rgba(1, 12, 9, .98));
-    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-    color: #f6eadd; font-family: var(--cv-sans, system-ui, sans-serif);
-    animation: wr-viewer-in .3s ease both;
-}
-@keyframes wr-viewer-in { from { opacity: 0; } to { opacity: 1; } }
-.wr-viewer__bar { display: flex; align-items: center; gap: 12px; padding: 14px clamp(14px, 3vw, 28px); }
-.wr-viewer__count { margin-right: auto; font-size: .85rem; letter-spacing: .18em; color: #d9ac75; }
-.wr-viewer button {
-    appearance: none; display: inline-grid; place-items: center; min-width: 44px; min-height: 44px; padding: 0 14px;
-    border: 1px solid rgba(226, 185, 138, .5); border-radius: 999px; background: rgba(6, 33, 27, .75);
-    color: #f6e3c6; font: 500 .9rem var(--cv-sans, system-ui, sans-serif); cursor: pointer;
-    transition: background .2s, color .2s, border-color .2s;
-}
-.wr-viewer button:hover, .wr-viewer button:focus-visible { background: #e2b98a; border-color: #e2b98a; color: #06211b; outline: none; }
-.wr-viewer button:focus-visible { box-shadow: 0 0 0 3px rgba(243, 214, 174, .5); }
-.wr-viewer__stage { position: relative; display: grid; place-items: center; min-height: 0; padding: 0 clamp(60px, 8vw, 110px); overflow: hidden; }
-.wr-viewer__img {
-    max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; border-radius: 10px;
-    box-shadow: 0 30px 80px -20px rgba(0, 0, 0, .9), 0 0 0 1px rgba(226, 185, 138, .35);
-    cursor: zoom-in; user-select: none; -webkit-user-drag: none;
-    transition: opacity .3s ease, transform .35s cubic-bezier(.2, .7, .2, 1);
-}
-.wr-viewer__img.is-switching { opacity: 0; transform: scale(.985); }
-.wr-viewer__img.is-zoomed { cursor: zoom-out; transform: scale(1.8); }
-.wr-viewer__nav { position: absolute; top: 50%; transform: translateY(-50%); width: 52px; height: 52px; padding: 0 !important; font-size: 2rem !important; line-height: 1; }
-.wr-viewer__nav--prev { left: clamp(8px, 2vw, 24px); }
-.wr-viewer__nav--next { right: clamp(8px, 2vw, 24px); }
-.wr-viewer__caption { margin: 0; padding: 14px clamp(16px, 5vw, 60px) 6px; text-align: center; font: 500 1.15rem/1.4 var(--cv-serif, Georgia, serif); letter-spacing: .04em; color: #f1d4a9; min-height: 1.4em; }
-.wr-viewer__thumbs { display: flex; justify-content: center; gap: 8px; padding: 10px clamp(14px, 3vw, 28px) clamp(14px, 2.4vw, 24px); overflow-x: auto; scrollbar-width: none; }
-.wr-viewer__thumbs::-webkit-scrollbar { display: none; }
-.wr-viewer__thumbs button { flex: none; width: 64px; height: 46px; min-width: 0; min-height: 0; padding: 0; border-radius: 8px; overflow: hidden; opacity: .55; }
-.wr-viewer__thumbs button img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.wr-viewer__thumbs button[aria-current="true"] { opacity: 1; border-color: #f3d6ae; box-shadow: 0 0 0 2px #e2b98a; }
-.wr-viewer__thumbs button:hover { opacity: 1; background: transparent; }
-@media (max-width: 640px) {
-    .wr-viewer__stage { padding: 0 10px; }
-    .wr-viewer__nav { top: auto; bottom: 8px; transform: none; width: 46px; height: 46px; }
-    .wr-viewer__nav--prev { left: 10px; }
-    .wr-viewer__nav--next { right: 10px; }
-    .wr-viewer__thumbs button { width: 52px; height: 38px; }
-}
-@media (prefers-reduced-motion: reduce) {
-    .wr .wr-panel:not([hidden]), .wr-viewer { animation: none; }
-    .wr .wr-zoom, .wr .wr-zoom img, .wr .wr-card, .wr .wr-price, .wr-viewer__img { transition: none; }
 }

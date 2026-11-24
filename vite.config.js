@@ -42,7 +42,6 @@ export default defineConfig({
                 'resources/css/book.css',
                 'resources/css/footer.css',
                 'resources/css/winter.css',
-                'resources/js/winter.js',
                 'resources/js/app.js',
                 'resources/js/gallery.js',
                 'resources/js/reviews.js',
